@@ -2,10 +2,10 @@
 
 ## 1. Thông Tin Chung
 
-- **Tên nhóm:** [Điền tên nhóm theo định dạng: tennhom-tenlop, ví dụ: nhom01-dhti15a1hn]
-- **Tên lớp học phần:** [Điền mã hoặc tên lớp học phần]
-- **Tên đề tài:** [Điền tên đề tài đồ án / bài tập lớn]
-- **Giảng viên hướng dẫn:** [Điền tên giảng viên]
+- **Tên nhóm:** nhom03-65httt
+- **Tên lớp học phần:** Hệ Thống Kinh Doanh Thông Minh - Lớp 65 HTTT
+- **Tên đề tài:** Hệ thống phân tích trải nghiệm người học và cạnh tranh giữa các nền tảng E-learning, ứng dụng AI phân tích cảm xúc và dự báo xu hướng (EduVision BI)
+- **Giảng viên hướng dẫn:** Ths. Đỗ Oanh Cường
 
 ---
 
@@ -13,9 +13,13 @@
 
 | STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Tỷ Lệ Đóng Góp (%) | Email |
 | :-: | :--- | :-: | :-: | :--- | :--- | :-: | :--- |
-| 1 | [Nguyễn Văn A] | [20210001] | [DHTI15A1HN] | Nhóm trưởng | Thiết kế kiến trúc, phát triển Backend API | 100% | a@student.edu.vn |
-| 2 | [Trần Thị B] | [20210002] | [DHTI15A1HN] | Thành viên | Thiết kế giao diện Frontend, tích hợp API | 100% | b@student.edu.vn |
-| 3 | [Lê Văn C] | [20210003] | [DHTI15A1HN] | Thành viên | Thiết kế cơ sở dữ liệu, kiểm thử phần mềm | 100% | c@student.edu.vn |
+| 1 | Giang Thanh Tùng | 2351160563 | 65HTTT | Nhóm trưởng | Điều phối dự án, kiến trúc tổng thể; mô hình cảm xúc M1 (PhoBERT), API FastAPI, khuyến nghị và cảnh báo tự sinh, chatbot LLM, workflow n8n, Docker Compose, tích hợp và kiểm thử | 20% | 2351160563@e.tlu.edu.vn |
+| 2 | Tạ Thị Ngọc Anh | 2351160503 | 65HTTT | Thành viên | Kho dữ liệu star schema và ERD, script ETL, nhật ký chất lượng dữ liệu, mô hình dự báo M3, phát hiện bất thường | 20% | 2351160503@e.tlu.edu.vn |
+| 3 | Nguyễn Thái Anh | 2351160502 | 65HTTT | Thành viên | Collector các nguồn dữ liệu, thu thập sâu, lịch sử ETL, mô hình cảm xúc theo khía cạnh M2 (ABSA) | 20% | 2351160502@e.tlu.edu.vn |
+| 4 | Nguyễn Hoàng Anh | 2251161939 | 65HTTT | Thành viên | Gán nhãn và LLM gán nhãn, mô hình nền TF-IDF, website, phân quyền, nhúng Superset, kiểm thử người dùng | 20% | 2251161939@e.tlu.edu.vn |
+| 5 | Hoàng Hữu Hưng | 2351160525 | 65HTTT | Thành viên | Dashboard Superset, KPI, BHI, mục khuyến nghị hành động, kịch bản demo và slide | 20% | 2351160525@e.tlu.edu.vn |
+
+> **Ghi chú:** Danh sách phân công nhiệm vụ và tỷ lệ đóng góp ở trên mới là **dự kiến**, có thể được điều chỉnh trong quá trình thực hiện đồ án.
 
 ---
 
