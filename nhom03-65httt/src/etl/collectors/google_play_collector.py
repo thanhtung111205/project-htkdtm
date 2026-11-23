@@ -94,7 +94,7 @@ def load_platform(platform_id: str) -> dict[str, str]:
         if not isinstance(platform, dict):
             continue
         if platform.get("id") == platform_id:
-            required = ("id", "play_id", "platform_group")
+            required = ("id", "play_id", "ios_id", "platform_group")
             missing = [key for key in required if not platform.get(key)]
             if missing:
                 raise CollectorError(
@@ -157,7 +157,11 @@ def normalize_review(review: dict[str, Any], product_id: str, crawled_at: str) -
     text = review.get("content") or ""
     # Tên hiển thị chỉ được đọc tạm thời để tạo mã băm; không được ghi vào CSV.
     display_name = str(review.get("userName") or "")
-    author_hash = hashlib.sha256(display_name.encode("utf-8")).hexdigest()[:12]
+    author_hash = (
+        hashlib.sha256(display_name.encode("utf-8")).hexdigest()[:12]
+        if display_name
+        else ""
+    )
     diacritic_count = sum(character in VIETNAMESE_DIACRITICS for character in text)
 
     return {
