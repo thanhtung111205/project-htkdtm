@@ -2,7 +2,7 @@
 
 ## Mục đích
 
-Hai collector thu thập đánh giá công khai cho một nền tảng mỗi lần chạy. Danh sách nền tảng và mã ứng dụng được đọc từ `nhom03-65httt/config/platforms.yml` (`id`, `play_id`, `ios_id`, `platform_group`). Google Play dùng thư viện `google-play-scraper`. App Store thử RSS Customer Reviews công khai của Apple; nếu RSS không có review, collector đọc các review được nhúng trên trang ứng dụng công khai. Tên hiển thị người đánh giá chỉ được dùng tạm để tạo `author_hash`, không được ghi vào CSV.
+Hai collector thu thập đánh giá công khai cho một nền tảng mỗi lần chạy. Danh sách nền tảng và mã ứng dụng được đọc từ `nhom03-65httt/config/platforms.yml` (`id`, `play_id`, `ios_id`, `platform_group`). Google Play dùng thư viện `google-play-scraper`. App Store chỉ đọc RSS Customer Reviews công khai của Apple. Tên hiển thị người đánh giá chỉ được dùng tạm để tạo `author_hash`, không được ghi vào CSV.
 
 ## Cài đặt
 
@@ -33,7 +33,7 @@ Các tham số của cả hai collector:
 - `--out`: thư mục lưu CSV, mặc định `nhom03-65httt/data/raw`.
 - `--sleep`: thời gian nghỉ giữa các trang, mặc định `2` giây; giá trị nhỏ hơn `2` bị từ chối.
 
-Collector Google Play lấy theo trang mới nhất bằng continuation token. RSS App Store giới hạn collector tối đa 500 đánh giá mỗi lần chạy; khi dùng trang ứng dụng dự phòng, số review có thể ít hơn vì chỉ lấy phần trang công khai trả về. Gặp HTTP 429, 5xx hoặc lỗi kết nối tạm thời, collector thử lại tối đa 5 lần với thời gian chờ tăng theo cấp số nhân. Không dùng proxy hoặc đổi IP, không cần token.
+Collector Google Play lấy theo trang mới nhất bằng continuation token. RSS App Store thường chỉ cung cấp tối đa khoảng 500 đánh giá gần nhất cho mỗi nền tảng, ít hơn Google Play; vì vậy dữ liệu App Store là một mẫu, không đại diện cho toàn bộ người dùng. Collector giới hạn tối đa 500 đánh giá mỗi lần chạy. Gặp HTTP 429, 5xx hoặc lỗi kết nối tạm thời, collector thử lại tối đa 5 lần với thời gian chờ tăng theo cấp số nhân. Không dùng proxy hoặc đổi IP, không cần token.
 
 Mỗi nguồn có tệp riêng: `google_play_<id>.csv` hoặc `app_store_<id>.csv`. Nếu tệp đã có, collector chỉ thêm `review_id` chưa xuất hiện trong tệp đó. RSS App Store đôi khi không có review công khai cho một storefront; khi đó collector vẫn tạo CSV có tiêu đề và báo 0 review mới.
 

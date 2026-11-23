@@ -94,7 +94,7 @@ def load_platform(platform_id: str) -> dict[str, str]:
         if not isinstance(platform, dict):
             continue
         if platform.get("id") == platform_id:
-            required = ("id", "play_id", "ios_id", "platform_group")
+            required = ("id", "play_id", "platform_group")
             missing = [key for key in required if not platform.get(key)]
             if missing:
                 raise CollectorError(

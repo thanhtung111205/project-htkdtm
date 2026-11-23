@@ -10,7 +10,6 @@ import re
 import sys
 import time
 from datetime import datetime, timezone
-from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -54,30 +53,6 @@ VIETNAMESE_DIACRITICS |= {character.upper() for character in VIETNAMESE_DIACRITI
 
 class CollectorError(RuntimeError):
     """Lỗi cấu hình hoặc lỗi không thể phục hồi khi thu thập."""
-
-
-class ScriptJSONParser(HTMLParser):
-    """Lấy nội dung JSON nhúng trong trang App Store công khai."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._in_script = False
-        self._parts: list[str] = []
-        self.scripts: list[str] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag == "script":
-            self._in_script = True
-            self._parts = []
-
-    def handle_data(self, data: str) -> None:
-        if self._in_script:
-            self._parts.append(data)
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "script" and self._in_script:
-            self.scripts.append("".join(self._parts))
-            self._in_script = False
 
 
 def parse_args() -> argparse.Namespace:
@@ -268,64 +243,9 @@ def request_bytes(
     raise CollectorError(f"Không đọc được {source_label}.")
 
 
-def walk_reviews(value: Any):
-    if isinstance(value, dict):
-        if value.get("$kind") == "Review":
-            yield value
-        for child in value.values():
-            yield from walk_reviews(child)
-    elif isinstance(value, list):
-        for child in value:
-            yield from walk_reviews(child)
-
-
-def request_product_page_reviews(
-    app_id: str, base_delay: float
-) -> list[dict[str, Any]]:
-    url = f"https://apps.apple.com/vn/app/id{quote(app_id, safe='')}?see-all=reviews"
-    body = request_bytes(
-        url,
-        base_delay,
-        "trang ứng dụng App Store",
-        {
-            "Accept": "text/html,application/xhtml+xml",
-            "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8",
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/131.0.0.0 Safari/537.36"
-            ),
-        },
-    )
-    parser = ScriptJSONParser()
-    parser.feed(body.decode("utf-8", errors="replace"))
-
-    reviews: list[dict[str, Any]] = []
-    for script in parser.scripts:
-        try:
-            payload = json.loads(script)
-        except (TypeError, json.JSONDecodeError):
-            continue
-        for item in walk_reviews(payload):
-            # Chỉ giữ trường review cần thiết; tên hiển thị chỉ dùng tạm để băm.
-            reviews.append(
-                {
-                    "id": item.get("id"),
-                    "im:rating": item.get("rating"),
-                    "content": {"label": item.get("contents") or ""},
-                    "title": {"label": item.get("title") or ""},
-                    "updated": {"label": item.get("date") or ""},
-                    "author": {
-                        "name": {"label": item.get("reviewerName") or ""}
-                    },
-                }
-            )
-    return reviews
-
-
 def request_page(
     app_id: str, page: int, base_delay: float
-) -> tuple[list[dict[str, Any]], bool]:
+) -> list[dict[str, Any]]:
     url = (
         "https://itunes.apple.com/vn/rss/customerreviews/"
         f"page={page}/id={quote(app_id, safe='')}/sortby=mostrecent/json"
@@ -356,15 +276,7 @@ def request_page(
         for entry in entries
         if isinstance(entry, dict) and entry.get("im:rating") is not None
     ]
-    if review_entries or page > 1:
-        return review_entries, False
-
-    print(
-        "RSS Apple không trả review; đọc các review đang hiển thị trên trang ứng dụng công khai.",
-        file=sys.stderr,
-    )
-    time.sleep(base_delay)
-    return request_product_page_reviews(app_id, base_delay), True
+    return review_entries
 
 
 def collect(args: argparse.Namespace) -> tuple[Path, int, int]:
@@ -382,7 +294,7 @@ def collect(args: argparse.Namespace) -> tuple[Path, int, int]:
     for page in range(1, MAX_PAGES + 1):
         if fetched_count >= requested_count:
             break
-        entries, used_public_page = request_page(app_id, page, args.sleep)
+        entries = request_page(app_id, page, args.sleep)
         if not entries:
             write_rows(csv_path, [])
             break
@@ -400,8 +312,6 @@ def collect(args: argparse.Namespace) -> tuple[Path, int, int]:
 
         write_rows(csv_path, new_rows)
         added_count += len(new_rows)
-        if used_public_page:
-            break
         if fetched_count < requested_count and page < MAX_PAGES:
             time.sleep(args.sleep)
 
@@ -409,9 +319,9 @@ def collect(args: argparse.Namespace) -> tuple[Path, int, int]:
 
 
 def main() -> int:
-    for stream in (sys.stdout, sys.stderr):
-        if hasattr(stream, "reconfigure"):
-            stream.reconfigure(errors="backslashreplace")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
 
     args = parse_args()
     try:
