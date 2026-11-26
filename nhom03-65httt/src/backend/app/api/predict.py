@@ -21,11 +21,6 @@ def predict_sentiment(payload: TextIn) -> None:
     raise _not_implemented("Mô hình cảm xúc M1")
 
 
-@router.post("/predict/aspects", responses=_NOT_READY, summary="Dự đoán cảm xúc theo khía cạnh (M2, ABSA)")
-def predict_aspects(payload: TextIn) -> None:
-    raise _not_implemented("Mô hình khía cạnh M2")
-
-
 @router.get("/forecast/{platform_id}", responses=_NOT_READY, summary="Dự báo tháng kế tiếp theo nền tảng (M3)")
 def forecast(platform_id: str) -> None:
     raise _not_implemented("Mô hình dự báo M3")

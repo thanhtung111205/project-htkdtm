@@ -46,7 +46,6 @@ def test_platforms_from_config():
 
 def test_ai_endpoints_are_not_implemented_yet():
     assert client.post("/api/v1/predict/sentiment", json={"text": "tốt"}).status_code == 501
-    assert client.post("/api/v1/predict/aspects", json={"text": "tốt"}).status_code == 501
     assert client.get("/api/v1/forecast/DUOLINGO").status_code == 501
     assert client.post("/api/v1/chat", json={"question": "xin chào"}).status_code == 501
 

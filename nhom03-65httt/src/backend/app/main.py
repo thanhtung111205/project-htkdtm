@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import health, platforms, predict
+from app.api import aspects, health, platforms, predict
 from app.core.config import get_settings
 
 
@@ -11,7 +11,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
         title="EduVision BI API",
-        description="API phục vụ website, n8n và Superset. Các điểm cuối AI hiện là khung (trả 501).",
+        description="API phục vụ website, n8n và Superset. Cảm xúc khía cạnh hiện dùng baseline từ khóa; mô hình M1 và dự báo chưa được nạp.",
         version="0.1.0",
     )
     app.add_middleware(
@@ -23,6 +23,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(platforms.router)
     app.include_router(predict.router)
+    app.include_router(aspects.router)
     return app
 
 
