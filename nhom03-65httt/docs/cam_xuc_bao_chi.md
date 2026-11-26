@@ -2,7 +2,7 @@
 
 ## Trạng thái ngày 26/11/2026
 
-Mã chạy lại được đã được chuẩn bị tại `src/ml/news/score_news.py`. Workspace hiện không có `data/raw/news/news.csv`, PostgreSQL chưa thể kết nối vì thiếu `.env`, và mô hình M1 chưa có trong nhánh nhóm hiện tại. Vì vậy chưa thể tính số bài giữ/bỏ, chấm 413 bài, xác nhận số dòng trong `dw.fact_news_sentiment`, hay báo kết quả KPI-07. Không coi các bước này là đã hoàn tất.
+Mã chạy lại được đã được chuẩn bị tại `src/ml/news/score_news.py`. Tệp mới `data/raw/news/news.csv` có 413 bài và 404 `title_hash` duy nhất. Áp dụng regex `title_match` trong `config/platforms.yml` giữ 122 bài, bỏ 291 bài; 122 dòng giữ không trùng theo `(platform, title_hash)`, gần mức tham chiếu 123 của đề cương. Chưa có trọng số/hàm suy luận M1 trong `models/`, cũng chưa có `.env`/kết nối PostgreSQL. Vì vậy chưa thể chấm 122 bài bằng M1, xác nhận số dòng trong `dw.fact_news_sentiment`, hay báo KPI-07. Không coi các bước này là đã hoàn tất.
 
 Khi M1 có trong môi trường, cung cấp hàm dự đoán theo hợp đồng trả về `sentiment_score` trong `[-1, 1]`, `sentiment_label` thuộc `tich_cuc|trung_tinh|tieu_cuc` và `confidence` trong `[0, 1]`; sau đó chạy:
 
