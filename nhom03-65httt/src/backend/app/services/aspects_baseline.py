@@ -21,8 +21,9 @@ ASPECT_TERMS: dict[str, tuple[str, ...]] = {
         "phan hoi", "lien he", "giai dap", "khieu nai", "khong ho tro", "khong hoan tien",
     ),
     "Pricing": (
-        "gia", "phi", "tien hoc", "tien phi", "thanh toan", "dang ky goi", "premium",
-        "re", "goi hoc", "thu phi", "gia han", "huy goi", "mien phi", "gia cao", "qua dat", "mac",
+        "phi", "tien hoc", "tien phi", "hoc phi", "thanh toan", "dang ky goi", "premium",
+        "re", "goi hoc", "thu phi", "gia han", "huy goi", "mien phi", "gia cao", "gia qua cao",
+        "gia dat", "gia ca", "gia tien", "gia re", "qua dat", "mac qua", "mac tien", "mac hon",
     ),
 }
 ASPECT_ORDER = tuple(ASPECT_TERMS)
@@ -32,7 +33,8 @@ POSITIVE_TERMS = (
 )
 NEGATIVE_TERMS = (
     "te", "loi", "lag", "cham", "treo", "kho", "that vong", "khong hai long",
-    "khong dung duoc", "khong dang nhap duoc", "gia dat", "qua dat", "mac", "mat tien", "phi cao", "khong chinh xac",
+    "khong dung duoc", "khong dang nhap duoc", "gia cao", "gia qua cao", "gia dat", "qua dat",
+    "mac qua", "mac tien", "mac hon", "mat tien", "phi cao", "khong chinh xac",
 )
 NEGATION_TERMS = ("khong", "chua", "chang", "khong the")
 CLAUSE_SPLIT = re.compile(r"[,;.!?\n]+|\s+(?:nhung|tuy nhien|con|however|but)\s+", re.IGNORECASE)
@@ -54,6 +56,14 @@ def _sentiment(clause: str) -> tuple[float, int]:
     negatives = [term for term in NEGATIVE_TERMS if _has_phrase(clause, term)]
     adjusted_positives: list[str] = []
     for term in positives:
+        # "hay" trước một vấn đề diễn tả tần suất ("app hay bị lỗi"), không phải lời khen.
+        if term == "hay" and any(
+            _has_phrase(clause, f"hay {problem}")
+            or _has_phrase(clause, f"hay bi {problem}")
+            or _has_phrase(clause, f"hay gap {problem}")
+            for problem in NEGATIVE_TERMS
+        ):
+            continue
         negated = any(_has_phrase(clause, f"{negation} {term}") for negation in NEGATION_TERMS)
         if negated:
             negatives.append(term)

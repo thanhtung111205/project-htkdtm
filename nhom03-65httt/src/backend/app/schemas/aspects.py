@@ -24,4 +24,5 @@ class AspectSentimentOut(BaseModel):
 
 
 class AspectsOut(BaseModel):
+    model: str = "keyword_baseline"
     aspects: list[AspectSentimentOut]

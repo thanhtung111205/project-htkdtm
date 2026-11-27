@@ -450,13 +450,13 @@ Việc:
 Nhánh `nhom03-65httt-thaianh-cam-xuc-bao-chi`. Commit: `feat(nhom03-65httt): cham cam xuc bao chi vao fact news sentiment`
 
 ```text
-Bối cảnh: schema 02 có dw.fact_news_sentiment (khóa: source_key, article_id, platform_key; cột time_key, sentiment_score từ -1 đến 1, sentiment_label, confidence, mention_count). Đề cương dùng cảm xúc báo chí làm đặc trưng của M3, cho KPI-07 (độ lệch báo chí và người học) và E3 phần (c). Dữ liệu: data/raw/news/news.csv (413 bài; cột platform, origin, title, outlet, link, published_at, collected_at, title_hash). Chỉ có tiêu đề, không có nội dung bài; nhiều bài không liên quan đến chất lượng nền tảng (ví dụ đề thi); đề cương ghi khoảng 123 bài liên quan. Báo chí quốc tế gần như không có (4 bài), nên phần này chủ yếu cho nhóm trong nước.
+Bối cảnh: schema 02 có dw.fact_news_sentiment (khóa: source_key, article_id, platform_key; cột time_key, sentiment_score từ -1 đến 1, sentiment_label, confidence, mention_count). Đề cương dùng cảm xúc báo chí làm đặc trưng của M3, cho KPI-07 (độ lệch báo chí và người học) và E3 phần (c). Dữ liệu `data/raw/news/news.csv` có 413 tiêu đề; nhiều bài không liên quan đến chất lượng nền tảng (ví dụ đề thi). Sau lọc liên quan, nhóm nền tảng quốc tế có 67 bài về Duolingo, không phải 4. Con số 4 thuộc snapshot riêng `data/raw/news_intl/news.csv`, không phải tổng số bài về Duolingo trong tập TA4. Baseline hiện gán khoảng 93% tiêu đề trung tính và chỉ xác nhận luồng; M1 chưa được kiểm định trên tiêu đề báo.
 Việc:
 1. src/ml/news/score_news.py: lọc bài liên quan (tiêu đề nhắc đúng tên nền tảng hoặc sản phẩm, bỏ tin thuần đề thi hoặc đáp án không nói về nền tảng; ghi quy tắc lọc rõ ràng) và ghi số bài giữ, bỏ vào báo cáo.
 2. Chấm cảm xúc tiêu đề bằng mô hình M1 của Tùng (T2) khi có, hoặc dùng mô hình cảm xúc có sẵn nếu M1 chưa xong; ghi tên mô hình vào dw.dim_model.
 3. Ghi vào dw.fact_news_sentiment: article_id lấy từ title_hash, time_key theo ngày đăng (published_at), sentiment_score, sentiment_label (tich_cuc, trung_tinh, tieu_cuc), confidence, mention_count. Chạy lại không sinh dòng trùng.
 4. Mô tả hạn chế trong docs/cam_xuc_bao_chi.md: chỉ có tiêu đề, mẫu nhỏ, lệch phân bố giữa các nền tảng; chỉ dùng cho phân tích khám phá.
-5. Kiểm thử bằng vài tiêu đề mẫu tự tạo (khen, chê, trung tính, không liên quan).
+5. Dùng 50 tiêu đề thật được gán nhãn tay trong `src/ml/sentiment/fixtures/ta4_news_title_gold_50.csv` để kiểm tra M1 trên miền tiêu đề. Chỉ lưu `title_hash` và nhãn, không sao chép dữ liệu báo thô vào Git. Tiêu đề “Duolingo thông báo 'cú xanh đã chết'” được gán trung tính vì mô tả chiến dịch linh vật, không thể hiện đánh giá tiêu cực về nền tảng.
 ```
 
 | # | Tiêu chí | Kết quả mong đợi |
@@ -467,7 +467,7 @@ Việc:
 | TA4.4 | Chạy lại | Số dòng không đổi; khóa `(source_key, article_id, platform_key)` không trùng |
 | TA4.5 | Ghi kho | Mỗi nền tảng có bài báo chí đều có dòng; `time_key` tồn tại trong `dim_time` |
 | TA4.6 | KPI-07 | Truy vấn `kpi_07_lech_bao_chi_nguoi_hoc.sql` chạy được trên dữ liệu thật và ra số trong -100 đến 100 |
-| TA4.7 | Hạn chế | Có tài liệu nêu rõ chỉ tiêu đề, mẫu nhỏ, báo chí quốc tế gần như không có |
+| TA4.7 | Hạn chế | Có tài liệu nêu rõ chỉ tiêu đề, baseline 93% trung tính chỉ dùng thử luồng, tập kiểm M1 gồm 50 tiêu đề và số 67 bài Duolingo sau lọc liên quan |
 | TA4.8 | Dữ liệu | Không đưa `news.csv` lên Git (B3) |
 
 ---
