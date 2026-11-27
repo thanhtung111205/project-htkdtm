@@ -51,7 +51,7 @@ def scalar(conn, sql):
 
 def test_five_queries_exist_and_return_rows(conn):
     queries = load_queries()
-    assert set(queries) == {"rollup", "drilldown", "slice", "dice", "pivot"}
+    assert set(queries) == {"rollup", "drilldown", "slice", "dice", "pivot", "pivot_hour", "dice_category", "mismatch"}
     for name, sql in queries.items():
         assert run(conn, sql), f"truy vấn {name} không ra dòng nào"
 
@@ -102,3 +102,26 @@ def test_pivot_columns_add_up(conn):
     rows = run(conn, load_queries()["pivot"])  # (platform, tich_cuc, trung_tinh, tieu_cuc, tong)
     assert all(r[1] + r[2] + r[3] == r[4] for r in rows)
     assert sum(r[4] for r in rows) == scalar(conn, "SELECT count(rating) FROM dw.fact_review")
+
+
+def test_pivot_hour_matches_independent_count(conn):
+    rows = run(conn, load_queries()["pivot_hour"])  # (day_part, tich_cuc, trung_tinh, tieu_cuc, tong)
+    assert all(r[1] + r[2] + r[3] == r[4] for r in rows)
+    assert sum(r[4] for r in rows) == scalar(conn, "SELECT count(*) FROM dw.fact_review WHERE rating IS NOT NULL AND hour_key IS NOT NULL")
+
+
+def test_dice_category_matches_independent_count(conn):
+    rows = run(conn, load_queries()["dice_category"])
+    if not rows:
+        pytest.skip("dim_platform.category chưa nạp (python src/etl/load/load_platform_attributes.py)")
+    expected = scalar(conn, """
+        SELECT count(*) FROM dw.fact_review f
+        WHERE f.time_key >= 20220101
+          AND f.platform_key IN (SELECT platform_key FROM dw.dim_platform WHERE category IS NOT NULL)""")
+    assert sum(r[2] for r in rows) == expected
+
+
+def test_mismatch_counts_consistent(conn):
+    rows = run(conn, load_queries()["mismatch"])  # (platform, labeled, mismatch, rate)
+    assert rows and all(r[2] <= r[1] for r in rows)
+    assert sum(r[1] for r in rows) == scalar(conn, "SELECT count(is_mismatch) FROM dw.fact_review")

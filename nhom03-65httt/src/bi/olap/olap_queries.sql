@@ -62,3 +62,40 @@ JOIN dw.dim_platform p ON p.platform_key = f.platform_key
 WHERE f.rating IS NOT NULL
 GROUP BY p.platform_name
 ORDER BY tong DESC;
+
+-- ---------------------------------------------------------------- mở rộng: cột bổ sung của migration 0006
+-- @query pivot_hour
+-- PHÉP: pivot (và drill-down giờ -> buổi). CHIỀU: dim_hour (buổi trong ngày) ở hàng, cảm xúc quy đổi từ số sao ở cột.
+-- Ý NGHĨA: đánh giá tiêu cực tập trung vào buổi nào trong ngày. hour_key theo giờ Việt Nam.
+SELECT h.day_part,
+       count(*) FILTER (WHERE f.rating BETWEEN 4 AND 5) AS tich_cuc,
+       count(*) FILTER (WHERE f.rating = 3)             AS trung_tinh,
+       count(*) FILTER (WHERE f.rating BETWEEN 1 AND 2) AS tieu_cuc,
+       count(*)                                         AS tong
+FROM dw.fact_review f
+JOIN dw.dim_hour h ON h.hour_key = f.hour_key
+WHERE f.rating IS NOT NULL
+GROUP BY h.day_part
+ORDER BY min(h.hour_key);
+
+-- @query dice_category
+-- PHÉP: dice. CHIỀU: dim_platform.category (ngoại ngữ so với học tổng hợp) x dim_time (năm). Ý NGHĨA: so hai nhóm nội dung theo năm.
+SELECT t.year, p.category, count(*) AS review_count, round(avg(f.rating), 2) AS avg_rating
+FROM dw.fact_review f
+JOIN dw.dim_time t     ON t.time_key = f.time_key
+JOIN dw.dim_platform p ON p.platform_key = f.platform_key
+WHERE p.category IS NOT NULL AND t.year >= 2022
+GROUP BY t.year, p.category
+ORDER BY t.year, p.category;
+
+-- @query mismatch
+-- PHÉP: drill-down theo nền tảng. CHỈ SỐ: cờ lệch pha is_mismatch (sao cao mà nhãn tiêu cực, hoặc sao thấp mà nhãn tích cực).
+-- is_mismatch chỉ có giá trị sau khi M1 chấm nhãn (dw.refresh_fact_review_sentiment); trước đó mismatch_rate rỗng.
+SELECT p.platform_name,
+       count(f.is_mismatch)                         AS labeled_reviews,
+       count(*) FILTER (WHERE f.is_mismatch)        AS mismatch_count,
+       round(count(*) FILTER (WHERE f.is_mismatch)::numeric / NULLIF(count(f.is_mismatch), 0), 4) AS mismatch_rate
+FROM dw.fact_review f
+JOIN dw.dim_platform p ON p.platform_key = f.platform_key
+GROUP BY p.platform_name
+ORDER BY p.platform_name;

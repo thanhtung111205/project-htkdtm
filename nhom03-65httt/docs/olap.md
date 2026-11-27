@@ -24,10 +24,14 @@ kiểm thử: `python -m pytest src/bi/tests/test_olap.py -q` (cần CSDL có d�
 | Slice | `dim_time` cố định năm 2025 | `slice` | Cắt một lát theo một chiều |
 | Dice | `dim_time` (2024 đến 2025), `dim_platform` (trong nước), `dim_source` (kho ứng dụng) | `dice` | Lọc đồng thời nhiều chiều |
 | Pivot | `dim_platform` ở hàng, cảm xúc ở cột | `pivot` (`count(*) FILTER`) | Bảng chéo nền tảng x cảm xúc |
+| Pivot, drill-down giờ | `dim_hour`: giờ → buổi (`day_part`) | `pivot_hour` | Cảm xúc theo buổi trong ngày (dùng `fact_review.hour_key`) |
+| Dice | `dim_platform.category` x `dim_time` (năm) | `dice_category` | So nhóm ngoại ngữ với học tổng hợp theo năm |
+| Drill-down | `dim_platform` | `mismatch` | Tỷ lệ cờ lệch pha `fact_review.is_mismatch` theo nền tảng |
 
 ## 3. Giới hạn hiện tại
 
 - Cảm xúc ở truy vấn `pivot` quy đổi từ số sao (4 đến 5 tích cực, 3 trung tính, 1 đến 2 tiêu cực), theo [kpi_bhi.md](kpi_bhi.md). Khi nhãn M1 trong `dw.fact_review_sentiment` đầy đủ, có thể thay bằng `sentiment_label` của `dw.v_review_enriched`.
+- `is_mismatch` (truy vấn `mismatch`) chỉ có giá trị sau khi M1 chấm nhãn và chạy `dw.refresh_fact_review_sentiment`; hiện mọi dòng rỗng nên `mismatch_rate` rỗng. `category` cần nạp bằng `load_platform_attributes.py`.
 - Pivot theo khía cạnh và drill-down xuống khía cạnh chưa chạy được trên dữ liệu thật vì `dw.fact_review_aspect` còn trống (chờ M2). Không có truy vấn mẫu nào giả lập dữ liệu này.
 - Roll-up theo phiên bản ứng dụng chưa làm được vì `dw.fact_review` không có khóa phiên bản (đang hỏi Tùng, thuộc việc N5).
 - Tệp không chứa dữ liệu thật; chỉ có truy vấn và mô tả.
