@@ -18,4 +18,5 @@ Lưu ý:
 - Google Trends nghỉ tối thiểu 15 giây giữa các yêu cầu. Khoảng thời gian dưới 5 năm thì Trends trả theo tuần, collector tự gộp về tháng. Bị chặn 429 vẫn không vượt qua thì dừng, không đổi IP hay dùng proxy.
 - Báo chí: Google News chỉ trả tối đa khoảng 100 tin mỗi truy vấn theo tháng; báo chí quốc tế gần như không có tin về các nền tảng này.
 - Vòng `run_pipeline.py` mặc định chỉ chạy Google Play và App Store. Thêm `--with-context` thì vòng chạy cả báo chí (nạp `clean.news_article`) và YouTube (khi có `YOUTUBE_API_KEY`). Trends và thông tin ứng dụng chạy tay.
+- Nạp Google Trends vào CSDL (G12, cần migration 0007): `python src/etl/load/load_trends.py` (từ thư mục `nhom03-65httt`) ghi vào `clean.trends_monthly`, chạy lại thì ghi đè số mới nhất. `interest_self_scaled` chuẩn hóa riêng từng nền tảng nên chỉ so theo thời gian trong cùng nền tảng; muốn so giữa các nền tảng thì thu thập ở chế độ mốc (không `--solo`) để có `interest_scaled_to_anchor`.
 - Kiểm thử không gọi mạng: `python -m pytest src/etl/collectors/tests`.
