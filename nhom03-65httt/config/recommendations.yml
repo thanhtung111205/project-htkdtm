@@ -1,0 +1,50 @@
+# Bảng ánh xạ cảnh báo sang ĐỀ XUẤT HÀNH ĐỘNG và BỘ PHẬN PHỤ TRÁCH (T7, đề cương mục khuyến nghị).
+# src/etl/generate_alerts.py đọc tệp này để điền dw.fact_alert.recommended_action và responsible_department.
+# Bộ phận dùng đúng tập trong chú thích cột (migration 0006): Product Manager, Customer Success, Đội kỹ thuật,
+# Marketing và Kinh doanh, Ban điều hành.
+#
+# Thứ tự chọn: (1) khía cạnh của cảnh báo (fact_alert.aspect_key), (2) khía cạnh chiếm ưu thế trong các đánh giá tiêu cực
+# của kỳ (fact_review_aspect, khi M2 có dữ liệu và khía cạnh đó chiếm ít nhất dominant_share), (3) theo chỉ số, (4) mặc định.
+# Chữ {platform}, {period} trong câu hành động được thay bằng tên nền tảng và khoảng thời gian của kỳ.
+
+dominant_share: 0.4      # khía cạnh chiếm >= 40% lượt nhắc tiêu cực trong kỳ thì coi là nguyên nhân chính
+min_aspect_mentions: 5   # dưới số lượt nhắc này không đủ để kết luận khía cạnh
+escalate_delta: 0.15     # vượt ngưỡng từ 15 điểm phần trăm trở lên: ghi thêm "báo cáo Ban điều hành"
+
+aspects:
+  Technical:
+    department: Đội kỹ thuật
+    action: >-
+      Rà soát lỗi kỹ thuật (treo, đăng nhập, tải chậm, mất tiến độ) được nhắc trong đánh giá tiêu cực của {platform}
+      kỳ {period}; tái hiện lỗi, ưu tiên bản vá và phản hồi người dùng khi đã sửa.
+  Academic:
+    department: Product Manager
+    action: >-
+      Xem lại chất lượng nội dung và lộ trình học bị phàn nàn ở {platform} kỳ {period} (bài học, giáo viên, độ khó);
+      lập danh sách nội dung cần chỉnh và kế hoạch cập nhật.
+  Customer Service:
+    department: Customer Success
+    action: >-
+      Kiểm tra các yêu cầu hỗ trợ chưa xử lý và thời gian phản hồi của {platform} kỳ {period};
+      liên hệ lại người dùng phàn nàn trong 48 giờ.
+  Pricing:
+    department: Marketing và Kinh doanh
+    action: >-
+      Rà soát phàn nàn về giá, gói cước, hoàn tiền và gia hạn tự động của {platform} kỳ {period};
+      làm rõ thông tin thanh toán và cân nhắc ưu đãi giữ chân.
+  Other:
+    department: Product Manager
+    action: >-
+      Đọc mẫu các đánh giá tiêu cực của {platform} kỳ {period} để xác định nguyên nhân chưa được phân loại.
+
+metrics:
+  negative_rate_2w:
+    department: Customer Success
+    action: >-
+      Tỷ lệ đánh giá tiêu cực của {platform} tăng bất thường trong kỳ {period}: đọc và phân loại các đánh giá 1 đến 2 sao,
+      phản hồi người dùng trong 48 giờ, chuyển lỗi lặp lại cho Đội kỹ thuật và Product Manager.
+
+default:
+  department: Product Manager
+  action: >-
+    Kiểm tra chỉ số {metric} của {platform} kỳ {period} và xác định nguyên nhân trước khi đóng cảnh báo.
