@@ -11,6 +11,10 @@ docs
 **/tests
 src/frontend
 src/backend
+# Ngoại lệ: mã phát hiện bất thường (N4) mà bước cảnh báo T7 trong run_pipeline dùng. Chỉ thư viện chuẩn, psycopg, yaml.
+!src/backend/app/__init__.py
+!src/backend/app/services/__init__.py
+!src/backend/app/services/anomaly.py
 src/bi
 src/ml
 src/database

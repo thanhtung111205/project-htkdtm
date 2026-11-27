@@ -17,6 +17,9 @@ RUN pip install -r /tmp/requirements.txt
 # Mã ETL và cấu hình nền tảng. Thư mục data (đánh giá thật, nhật ký) được gắn vào lúc chạy, không đóng gói vào ảnh.
 COPY src/etl ./src/etl
 COPY config ./config
+# Mã phát hiện bất thường (N4) cho bước cảnh báo T7; detect_anomaly.py tìm nó ở src/backend.
+COPY src/backend/app/__init__.py ./src/backend/app/__init__.py
+COPY src/backend/app/services/__init__.py src/backend/app/services/anomaly.py ./src/backend/app/services/
 
 # Chạy bằng người dùng thường, không dùng root. data/ do Compose gắn vào và cho phép ghi.
 RUN useradd --create-home --uid 10001 appuser && mkdir -p data && chown -R appuser /repo

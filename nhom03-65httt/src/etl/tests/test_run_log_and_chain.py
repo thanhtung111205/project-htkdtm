@@ -108,7 +108,8 @@ def test_post_steps_skip_scoring_without_model_and_build_platform_period(conn, m
     steps: list[dict] = []
     failures = run_pipeline.run_post_steps(argparse.Namespace(env_file=None), steps)
     assert failures == 0
-    assert [s["step"] for s in steps] == ["platform_period"] and steps[0]["status"] == "success"
+    assert [s["step"] for s in steps] == ["platform_period", "alert"]
+    assert all(s["status"] == "success" for s in steps)
 
 
 def test_cycle_dry_run_does_not_write_run_log_or_post_steps(tmp_path, monkeypatch, conn) -> None:

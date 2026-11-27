@@ -11,7 +11,7 @@ Mỗi vòng:
      (giãn cách tối thiểu 2 giây, không đổi IP, không proxy: theo docs/dao_duc_phap_ly.md).
   2. Nạp các CSV vừa thu thập qua raw -> clean -> dw (loại trùng theo (source, review_id), chạy lại không sinh trùng).
   3. Sau khi nạp (trừ --dry-run và --no-post): chấm cảm xúc M1 cho đánh giá mới (nếu có mô hình và thư viện torch),
-     rồi tổng hợp dw.fact_platform_period (nền tảng x tháng). Bước lỗi không làm hỏng vòng, trạng thái là `partial`.
+     rồi tổng hợp dw.fact_platform_period (nền tảng x tháng), rồi sinh cảnh báo và khuyến nghị vào dw.fact_alert (T7). Bước lỗi không làm hỏng vòng, trạng thái là `partial`.
   4. Với --with-context: thu thập thêm báo chí (nạp clean.news_article) và YouTube (khi có YOUTUBE_API_KEY).
   5. Ghi một bản ghi vào data/logs/pipeline_runs.jsonl (ngoài Git) và từng bước vào dw.etl_run_log (nếu bảng có).
 
@@ -170,7 +170,7 @@ def _step(steps: list[dict], name: str, status: str, started: datetime, **fields
 
 
 def run_post_steps(args: argparse.Namespace, steps: list[dict]) -> int:
-    """Chấm M1 cho đánh giá mới rồi dựng lại fact_platform_period. Trả về số bước lỗi."""
+    """Chấm M1 cho đánh giá mới, dựng lại fact_platform_period, rồi sinh cảnh báo và khuyến nghị. Trả về số bước lỗi."""
     failures = 0
     scoring_ready = SCORE_SCRIPT.is_file() and MODEL_DIR.is_dir() and importlib.util.find_spec("torch") is not None
     if scoring_ready:
@@ -203,6 +203,20 @@ def run_post_steps(args: argparse.Namespace, steps: list[dict]) -> int:
         failures += 1
         _step(steps, "platform_period", "failed", started, error=f"{type(exc).__name__}: {exc}")
         print("  tổng hợp nền tảng x tháng: LỖI", exc, file=sys.stderr)
+
+    started = datetime.now(timezone.utc)
+    try:
+        from generate_alerts import run as generate_alerts  # nạp muộn: thiếu mã bất thường thì chỉ bước này lỗi
+
+        with connect(args.env_file) as conn:
+            alerts = generate_alerts(conn)
+            conn.commit()
+        _step(steps, "alert", "success", started, rows_read=alerts["detected"], rows_inserted=alerts["inserted"])
+        print(f"  cảnh báo và khuyến nghị (T7): {alerts['inserted']} cảnh báo mới, điền khuyến nghị {alerts['filled']}")
+    except Exception as exc:  # noqa: BLE001
+        failures += 1
+        _step(steps, "alert", "failed", started, error=f"{type(exc).__name__}: {exc}")
+        print("  cảnh báo và khuyến nghị (T7): LỖI", exc, file=sys.stderr)
     return failures
 
 
@@ -375,7 +389,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true", help="Chạy thử, hoàn tác ETL, vòng không tính vào bằng chứng")
     parser.add_argument("--env-file", type=Path, default=None, help="Tệp .env chứa POSTGRES_*")
     parser.add_argument("--no-post", action="store_true",
-                        help="Không chấm M1 và không dựng fact_platform_period sau khi nạp")
+                        help="Không chấm M1, không dựng fact_platform_period và không sinh cảnh báo sau khi nạp")
     parser.add_argument("--with-context", action="store_true",
                         help="Thu thập thêm báo chí (và YouTube nếu có YOUTUBE_API_KEY) trong cùng vòng")
     parser.add_argument("--report", action="store_true", help="In bằng chứng tự chạy liên tiếp rồi thoát")
