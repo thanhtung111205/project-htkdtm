@@ -1,0 +1,4 @@
+# Thư viện cho collector T4 (YouTube, báo chí, Trends, thông tin ứng dụng); gồm cả collector có sẵn
+-r requirements.txt
+pytrends
+pandas
