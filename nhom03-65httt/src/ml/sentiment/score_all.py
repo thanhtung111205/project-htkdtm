@@ -66,6 +66,16 @@ def upsert_rows(conn, model_key: int, review_keys: list[int], proba) -> None:
                    confidence = EXCLUDED.confidence, scored_at = EXCLUDED.scored_at""", rows)
 
 
+def refresh_review_columns(conn, review_keys: list[int]) -> int:
+    """Đồng bộ nhãn, điểm và cờ lệch pha sang dw.fact_review (migration 0006). Chưa có hàm thì bỏ qua, trả 0."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT to_regprocedure('dw.refresh_fact_review_sentiment(bigint[])') IS NOT NULL")
+        if not cur.fetchone()[0]:
+            return 0
+        cur.execute("SELECT dw.refresh_fact_review_sentiment(%s)", (review_keys,))
+        return int(cur.fetchone()[0])
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Chấm điểm cảm xúc M1 vào dw.fact_review_sentiment")
     parser.add_argument("--model-dir", type=Path, default=DEFAULT_MODEL_DIR)
@@ -105,6 +115,7 @@ def main(argv=None) -> int:
                 part = pending[start:start + args.chunk]
                 proba = scorer.predict_proba([t for _, t in part])
                 upsert_rows(conn, model_key, [k for k, _ in part], proba)
+                refresh_review_columns(conn, [k for k, _ in part])
                 dist.update(LABELS[int(i)] for i in proba.argmax(1))
                 total_written += len(part)
                 if not args.dry_run:

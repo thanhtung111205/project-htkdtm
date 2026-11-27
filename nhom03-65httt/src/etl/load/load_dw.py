@@ -3,7 +3,7 @@
 - dim_platform lấy từ config/platforms.yml (thêm nền tảng = thêm khối cấu hình, không sửa mã).
 - dim_source lấy từ các giá trị `source` có trong dữ liệu thô.
 - dim_time sinh theo ngày (giờ Việt Nam) phủ khoảng thời gian của dữ liệu.
-- fact_review: một dòng cho mỗi đánh giá đã làm sạch có ngày và nền tảng hợp lệ.
+- fact_review: một dòng cho mỗi đánh giá đã làm sạch có ngày và nền tảng hợp lệ (kèm giờ đăng và độ dài khi đã có migration 0006).
 Mọi lệnh dùng ON CONFLICT nên chạy lại không sinh trùng. Hàm không commit.
 """
 
@@ -84,19 +84,40 @@ def ensure_dim_time(conn: psycopg.Connection) -> int:
         return cur.rowcount
 
 
+def _existing_columns(cur: psycopg.Cursor, table: str, names: tuple[str, ...]) -> set[str]:
+    """Các cột trong danh sách thực sự có trong dw.<table> (để mã vẫn chạy trên CSDL chưa áp migration 0006)."""
+    cur.execute(
+        "SELECT column_name FROM information_schema.columns WHERE table_schema = 'dw' AND table_name = %s "
+        "AND column_name = ANY(%s)",
+        (table, list(names)),
+    )
+    return {row[0] for row in cur.fetchall()}
+
+
+# Cột bổ sung của migration 0006 (đề cương mục 7.1): giờ đăng (theo giờ Việt Nam) và độ dài văn bản đã làm sạch.
+OPTIONAL_FACT_COLUMNS = {
+    "hour_key": "extract(hour FROM r.created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::smallint",
+    "review_length": "length(c.text)",
+}
+
+
 def load_fact_review(conn: psycopg.Connection) -> dict[str, int]:
     with conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM clean.review_text")
         clean_total = cur.fetchone()[0]
+        present = _existing_columns(cur, "fact_review", tuple(OPTIONAL_FACT_COLUMNS))
+        extra = [name for name in OPTIONAL_FACT_COLUMNS if name in present]  # tên cố định trong mã, không từ người dùng
+        extra_cols = "".join(f", {name}" for name in extra)
+        extra_exprs = "".join(", " + OPTIONAL_FACT_COLUMNS[name] for name in extra)
         cur.execute(
-            """
-            INSERT INTO dw.fact_review (review_key, time_key, platform_key, source_key, rating, thumbs_up)
+            f"""
+            INSERT INTO dw.fact_review (review_key, time_key, platform_key, source_key, rating, thumbs_up{extra_cols})
             SELECT c.review_key,
                    to_char((r.created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date, 'YYYYMMDD')::int,
                    p.platform_key,
                    s.source_key,
                    CASE WHEN r.rating BETWEEN 1 AND 5 THEN r.rating END,
-                   coalesce(greatest(r.thumbs_up, 0), 0)
+                   coalesce(greatest(r.thumbs_up, 0), 0){extra_exprs}
             FROM clean.review_text c
             JOIN raw.review_raw r ON r.source = c.source AND r.review_id = c.review_id
             JOIN dw.dim_platform p ON upper(p.platform_name) = upper(r.product)
