@@ -1,0 +1,8 @@
+# Thư viện để API chạy M1 cảm xúc (POST /api/v1/predict/sentiment). Dockerfile cài khi INSTALL_M1=1 (mặc định).
+# torch cài riêng bản CPU (nhẹ, máy không có GPU), xem Dockerfile.
+# scikit-learn ghim đúng bản đã lưu models/m1_tfidf_lr/model.joblib (joblib không đảm bảo đọc được giữa các bản).
+transformers==5.22.1
+underthesea==9.5.0
+scikit-learn==1.8.0
+joblib>=1.3
+numpy>=1.26
