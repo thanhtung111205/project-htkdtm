@@ -45,8 +45,9 @@ TF-IDF chéo nền tảng: huấn luyện nhóm trong nước, kiểm thử nhó
 
 ## Giới hạn (đọc trước khi dùng số liệu)
 
-- **Nhãn là nhãn LLM** (`claude-sonnet-5-5` theo rubric của nhóm), không phải nhãn người. "Tập vàng LLM" chỉ đo mức khớp với LLM đã gán, **chưa phải độ chính xác so với người**. Độ nhất quán giữa hai lần LLM gán độc lập: kappa 0,912 trên 200 dòng. Cần đo lại bằng tập vàng người khi nhóm gán xong.
-- **Chưa làm:** cánh LLM zero-shot của E1, PhoBERT chéo nền tảng, đo trên tập vàng người, API `/api/v1/predict/sentiment` (hiện là khung trả 501).
+- **Tập vàng người đã được gán ngày 27/11/2026.** PhoBERT đạt macro-F1 0,6769 trên 1.144 mẫu đồng thuận, dưới ngưỡng tối thiểu 0,70; xem [kết quả tập vàng](../../../docs/ket_qua_tap_vang.md). Kết quả trên tập vàng LLM vẫn chỉ đo mức khớp với LLM, không thay cho độ chính xác so với người.
+- Độ nhất quán giữa hai lần LLM gán độc lập: kappa 0,912 trên 200 dòng. Kappa giữa người với người là 0,789 trên 200 mẫu gán đôi; giữa người với LLM là 0,7017.
+- **Chưa làm:** PhoBERT chéo nền tảng và API `/api/v1/predict/sentiment` (hiện là khung trả 501). LLM zero-shot và đo trên tập vàng người đã có số liệu trong báo cáo kết quả.
 - **Phạm vi ngôn ngữ:** mẫu huấn luyện chỉ gồm văn bản tiếng Việt (`lang_guess = vi`). Khoảng 32% đánh giá trong kho được nhận dạng là `other` (bình luận rất ngắn, tiếng Anh, emoji); mô hình vẫn chấm nhưng độ tin cậy trên nhóm này chưa được đo.
 - **Lớp trung tính khó nhất** (ít mẫu, ranh giới mờ): F1 thấp hơn rõ so với hai lớp còn lại.
 - Chạy trên CPU, không có GPU; chưa thử nghiệm siêu tham số ngoài cấu hình mặc định (lr 3e-5, 4 epoch, batch 32, độ dài tối đa 128).

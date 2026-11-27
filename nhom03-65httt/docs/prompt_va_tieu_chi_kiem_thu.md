@@ -55,7 +55,7 @@ Quy tắc bắt buộc:
 
 ## C0. Gán tay tập vàng (cả nhóm: T0, N0, TA0, HA0, HU0), P1
 
-Tệp gán nhãn thật: `BoGanNhan_EduVision_1200_v2.xlsx` (ngoài Git). Hiện **chưa ai gán** (cả 5 sheet đều 0 dòng có nhãn).
+Tệp gán nhãn thật được lưu qua kênh riêng, ngoài Git. Cập nhật 27/11/2026: cả 5 người đã gán đủ 280 dòng; có 1.200 mã mẫu duy nhất và 200 mẫu gán đôi. Kết quả kiểm tra cột A–B, nhãn và Cohen's kappa được ghi tại [ket_qua_tap_vang.md](ket_qua_tap_vang.md). Không đưa tệp Excel hoặc dữ liệu đánh giá lên Git.
 
 Thông tin đã kiểm tra trong tệp:
 - 1.200 mẫu: VUIHOC 250, ELSA Speak 250, DUOLINGO 250, MONKEY 250, HOCMAI 200; trong đó **200 mẫu hai người cùng gán** (cột `is_overlap`), 1.000 mẫu một người gán.
