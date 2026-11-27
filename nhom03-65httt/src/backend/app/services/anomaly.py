@@ -15,7 +15,7 @@ import psycopg
 
 ANCHOR = date(2011, 1, 3)  # thứ Hai; kỳ hai tuần đếm từ đây
 DEFAULTS = {"window": 8, "k": 2.0, "min_delta": 0.05, "min_reviews": 10, "metric_name": "negative_rate_2w",
-            "recent_periods_to_alert": 4}
+            "recent_days": 28}
 
 
 def load_config(path: Path | None = None) -> dict:

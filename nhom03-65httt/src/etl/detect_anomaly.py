@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ETL_DIR = Path(__file__).resolve().parent
@@ -22,7 +22,19 @@ from app.services.anomaly import attach_events, detect, fetch_series, load_confi
 from common import connect  # noqa: E402
 
 
-def write_alerts(conn, cfg: dict, platform: str | None = None, all_periods: bool = False) -> dict:
+def today_vn() -> date:
+    return datetime.now(timezone(timedelta(hours=7))).date()
+
+
+def alertable(results: list, today: date, recent_days: int, all_periods: bool = False) -> list:
+    """Kỳ được phép ghi cảnh báo: chỉ kỳ ĐÃ KẾT THÚC (kỳ đang chạy còn đổi số liệu) và, trừ khi --all,
+    chỉ kỳ bắt đầu trong recent_days ngày gần đây (không báo lại lịch sử cũ khi nối vào email)."""
+    return [r for r in results
+            if r.period_end < today and (all_periods or (today - r.period_start).days <= recent_days)]
+
+
+def write_alerts(conn, cfg: dict, platform: str | None = None, all_periods: bool = False,
+                 today: date | None = None) -> dict:
     """Ghi cảnh báo mới; hàm không commit. Trả về số kỳ xét, số bất thường, số cảnh báo mới ghi."""
     metric = cfg["metric_name"]
     summary = {"series": 0, "anomalies": 0, "inserted": 0, "skipped_short": [], "found": []}
@@ -33,8 +45,7 @@ def write_alerts(conn, cfg: dict, platform: str | None = None, all_periods: bool
             summary["skipped_short"].append(f"{name} ({len(results)} kỳ)")
             continue
         attach_events(conn, name, results)
-        recent = results if all_periods else results[-cfg["recent_periods_to_alert"]:]
-        for res in recent:
+        for res in alertable(results, today or today_vn(), cfg["recent_days"], all_periods):
             if not res.is_anomaly:
                 continue
             summary["anomalies"] += 1
@@ -61,7 +72,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Phát hiện bất thường và ghi dw.fact_alert")
     parser.add_argument("--dry-run", action="store_true", help="tính rồi hoàn tác, không ghi")
     parser.add_argument("--platform", help="chỉ một nền tảng (mặc định tất cả)")
-    parser.add_argument("--all", action="store_true", help="ghi cảnh báo cho mọi kỳ lịch sử, không chỉ các kỳ gần nhất")
+    parser.add_argument("--all", action="store_true", help="ghi cảnh báo cho mọi kỳ đã kết thúc trong lịch sử, không chỉ các kỳ bắt đầu trong recent_days ngày gần đây")
     args = parser.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):

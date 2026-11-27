@@ -9,7 +9,9 @@ ETL_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ETL_DIR))
 
 from common import connect  # noqa: E402
-from detect_anomaly import write_alerts  # noqa: E402
+from datetime import date, timedelta  # noqa: E402
+
+from detect_anomaly import alertable, write_alerts  # noqa: E402
 
 from app.services.anomaly import load_config  # noqa: E402  (đã thêm src/backend vào sys.path bởi detect_anomaly)
 
@@ -49,3 +51,16 @@ def test_rerun_does_not_duplicate_alerts(conn):
 def test_short_series_reported_without_error(conn):
     summary = write_alerts(conn, load_config(), platform="DUOLINGO")
     assert summary["inserted"] == 0 and summary["skipped_short"]
+
+
+def test_alertable_only_finished_and_recent_periods():
+    from app.services.anomaly import PeriodResult
+
+    today = date(2026, 11, 27)
+
+    def period(start):
+        return PeriodResult(start, start + timedelta(days=13), 50, 0.5)
+
+    old, recent, running = period(date(2025, 2, 10)), period(date(2026, 11, 2)), period(date(2026, 11, 16))
+    assert alertable([old, recent, running], today, 28) == [recent]               # cũ bị loại, kỳ đang chạy bị loại
+    assert alertable([old, recent, running], today, 28, all_periods=True) == [old, recent]  # --all vẫn bỏ kỳ chưa kết thúc
