@@ -26,11 +26,6 @@ def predict_aspects(payload: TextIn) -> None:
     raise _not_implemented("Mô hình khía cạnh M2")
 
 
-@router.get("/forecast/{platform_id}", responses=_NOT_READY, summary="Dự báo tháng kế tiếp theo nền tảng (M3)")
-def forecast(platform_id: str) -> None:
-    raise _not_implemented("Mô hình dự báo M3")
-
-
 @router.post("/chat", responses=_NOT_READY, summary="Chatbot LLM hỏi đáp trên số liệu")
 def chat(payload: ChatIn) -> None:
     raise _not_implemented("Chatbot LLM")
