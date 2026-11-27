@@ -1,0 +1,12 @@
+# Cấu hình phát hiện bất thường (N4). Quy tắc thống kê, KHÔNG huấn luyện (đề cương).
+# Chỉ số: tỷ lệ tiêu cực của từng nền tảng theo kỳ hai tuần, tính từ dw.fact_review (rating 1 đến 2 trên số đánh giá có sao).
+# Bất thường khi: giá trị > trung bình 8 kỳ trước + 2 độ lệch chuẩn (mẫu) VÀ cao hơn trung bình ít nhất min_delta.
+window: 8          # số kỳ trước dùng làm đường cơ sở (đề cương); dưới số này không tính
+k: 2.0             # số độ lệch chuẩn cộng thêm (đề cương)
+# Chuỗi phẳng có độ lệch chuẩn bằng 0 nên mọi dao động nhỏ đều vượt ngưỡng; min_delta chặn báo động giả:
+# chỉ báo khi tỷ lệ tiêu cực tăng ít nhất 5 điểm phần trăm so với trung bình (giá trị 0.05 là lựa chọn của nhóm, chờ thống nhất KPI-09 với Hưng).
+min_delta: 0.05
+# Kỳ có quá ít đánh giá cho tỷ lệ nhiễu mạnh nên bị bỏ khỏi chuỗi (lựa chọn của nhóm, chờ thống nhất với Hưng).
+min_reviews: 10
+metric_name: negative_rate_2w
+recent_periods_to_alert: 4   # script chỉ ghi cảnh báo cho 4 kỳ gần nhất mỗi nền tảng (tránh tràn email khi nạp lịch sử); --all để ghi hết
