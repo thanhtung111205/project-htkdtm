@@ -18,6 +18,25 @@ class Settings(BaseSettings):
     platforms_file: str = ""
     # Các nguồn được phép gọi API (website), cách nhau bằng dấu phẩy.
     cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    # M1 cảm xúc (T2). auto: PhoBERT nếu có mô hình và thư viện torch, không thì TF-IDF; phobert hoặc tfidf để ép một loại.
+    m1_backend: str = "auto"
+    # Để trống thì tự tìm models/m1_phobert_sentiment và models/m1_tfidf_lr/model.joblib ngược lên từ mã nguồn.
+    m1_model_dir: str = ""
+    m1_baseline_path: str = ""
+    m1_threads: int = 2
+    # Nạp sẵn mô hình M1 ở luồng nền khi API khởi động (tránh lần gọi đầu chờ vài giây). Docker bật, kiểm thử tắt.
+    m1_warmup: bool = False
+
+    def resolve_model_path(self, configured: str, relative: str) -> Path | None:
+        """Đường dẫn mô hình M1: theo biến môi trường nếu có, không thì tìm thư mục models/ ngược lên từ mã nguồn."""
+        if configured:
+            path = Path(configured)
+            return path if path.exists() else None
+        for parent in Path(__file__).resolve().parents:
+            candidate = parent / "models" / relative
+            if candidate.exists():
+                return candidate
+        return None
 
     @property
     def cors_origin_list(self) -> list[str]:

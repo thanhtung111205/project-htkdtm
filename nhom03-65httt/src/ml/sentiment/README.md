@@ -43,10 +43,32 @@ python src/etl/build_platform_period.py --sentiment-source model                
 
 TF-IDF chéo nền tảng: huấn luyện nhóm trong nước, kiểm thử nhóm quốc tế 0,744; chiều ngược lại 0,787.
 
+## Kết quả E1 trên tập vàng NGƯỜI GÁN (27/11/2026)
+
+Chạy: `python src/ml/sentiment/eval_human_gold.py` (đọc `data/raw/labeling/gan_nhan_tung_nguoi/BoGanNhan_*.xlsx`, ghi `data/ml/e1_human_gold.json`).
+5 người gán, mỗi người 280 dòng; 200 dòng do hai người cùng gán. Tập vàng người: **1.144 dòng** (558 tiêu cực, 230 trung tính,
+356 tích cực) sau khi loại 27 dòng hai người bất đồng và 29 dòng "bỏ qua".
+
+- Độ đồng thuận người với người: **kappa 0,789** (đồng ý 86,5%, 200 dòng). Người với LLM: kappa 0,702 (đồng ý 81,3%).
+
+| Mô hình | macro-F1 | Độ chính xác | F1 tiêu cực / trung tính / tích cực |
+|---|---|---|---|
+| LLM zero-shot (nhãn `llm_labels_gold.csv`) | **0,751** | 0,809 | 0,879 / 0,520 / 0,853 |
+| **PhoBERT** | 0,677 | 0,758 | 0,838 / 0,366 / 0,827 |
+| TF-IDF + Logistic Regression | 0,659 | 0,727 | 0,807 / 0,396 / 0,775 |
+
+Nhận xét:
+- Trên nhãn người, cả ba đều thấp hơn số đo trên tập vàng LLM (PhoBERT 0,860 xuống 0,677): M1 học từ nhãn LLM nên khớp LLM
+  hơn khớp người.
+- **Lớp trung tính là điểm yếu chính**: người gán nhiều đánh giá là trung tính (230 dòng) mà PhoBERT xếp thành tiêu cực
+  (114 dòng) hoặc tích cực (48 dòng). Hai lớp còn lại đạt F1 trên 0,82.
+- PhoBERT hơn TF-IDF về macro-F1 và độ chính xác nhưng kém LLM zero-shot. Hướng cải thiện: huấn luyện thêm bằng nhãn người,
+  cân lại lớp trung tính.
+
 ## Giới hạn (đọc trước khi dùng số liệu)
 
-- **Nhãn là nhãn LLM** (`claude-sonnet-5-5` theo rubric của nhóm), không phải nhãn người. "Tập vàng LLM" chỉ đo mức khớp với LLM đã gán, **chưa phải độ chính xác so với người**. Độ nhất quán giữa hai lần LLM gán độc lập: kappa 0,912 trên 200 dòng. Cần đo lại bằng tập vàng người khi nhóm gán xong.
-- **Chưa làm:** cánh LLM zero-shot của E1, PhoBERT chéo nền tảng, đo trên tập vàng người, API `/api/v1/predict/sentiment` (hiện là khung trả 501).
+- **Nhãn là nhãn LLM** (`claude-sonnet-5-5` theo rubric của nhóm), không phải nhãn người. "Tập vàng LLM" chỉ đo mức khớp với LLM đã gán, **chưa phải độ chính xác so với người**. Độ nhất quán giữa hai lần LLM gán độc lập: kappa 0,912 trên 200 dòng. Đã đo lại bằng tập vàng người, xem mục trên.
+- **Chưa làm:** cánh LLM zero-shot của E1, PhoBERT chéo nền tảng, đo trên tập vàng người. API `POST /api/v1/predict/sentiment` đã chạy thật (PhoBERT, dự phòng TF-IDF), xem `src/backend/app/api/sentiment.py`.
 - **Phạm vi ngôn ngữ:** mẫu huấn luyện chỉ gồm văn bản tiếng Việt (`lang_guess = vi`). Khoảng 32% đánh giá trong kho được nhận dạng là `other` (bình luận rất ngắn, tiếng Anh, emoji); mô hình vẫn chấm nhưng độ tin cậy trên nhóm này chưa được đo.
 - **Lớp trung tính khó nhất** (ít mẫu, ranh giới mờ): F1 thấp hơn rõ so với hai lớp còn lại.
 - Chạy trên CPU, không có GPU; chưa thử nghiệm siêu tham số ngoài cấu hình mặc định (lr 3e-5, 4 epoch, batch 32, độ dài tối đa 128).

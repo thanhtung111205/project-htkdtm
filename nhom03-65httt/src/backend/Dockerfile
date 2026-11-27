@@ -12,6 +12,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# M1 cảm xúc (T2): torch bản CPU và thư viện mô hình. Ảnh nhẹ không có M1: docker compose build --build-arg INSTALL_M1=0 api
+# (khi đó /predict/sentiment trả 503). Tệp mô hình không nằm trong ảnh, docker-compose gắn ./models vào /app/models.
+ARG INSTALL_M1=1
+COPY requirements-m1.txt .
+RUN if [ "$INSTALL_M1" = "1" ]; then \
+        pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu && \
+        pip install -r requirements-m1.txt; \
+    fi
+
 COPY app ./app
 
 # Chạy bằng người dùng thường, không dùng root.
