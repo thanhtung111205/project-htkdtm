@@ -1,0 +1,50 @@
+slice_name: "T\u1ED5ng h\u1EE3p KPI theo n\u1EC1n t\u1EA3ng"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 1__table
+  viz_type: table
+  query_mode: aggregate
+  groupby:
+  - platform_group
+  - platform_name
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: new_review_count
+    aggregate: SUM
+    label: SUM(new_review_count)
+  - expressionType: SIMPLE
+    column:
+      column_name: avg_rating
+    aggregate: AVG
+    label: AVG(avg_rating)
+  - expressionType: SIMPLE
+    column:
+      column_name: sentiment_index
+    aggregate: AVG
+    label: AVG(sentiment_index)
+  - expressionType: SIMPLE
+    column:
+      column_name: negative_rate
+    aggregate: AVG
+    label: AVG(negative_rate)
+  - expressionType: SIMPLE
+    column:
+      column_name: bhi
+    aggregate: AVG
+    label: AVG(bhi)
+  all_columns: []
+  percent_metrics: []
+  row_limit: 10000
+  adhoc_filters: []
+  extra_form_data: {}
+  dashboards:
+  - 2
+query_context: null
+cache_timeout: null
+uuid: 52f2e476-138a-4084-b0fe-62f4a4bac387
+version: 1.0.0
+dataset_uuid: 189ca924-1f44-4f1c-9534-b56410faba45

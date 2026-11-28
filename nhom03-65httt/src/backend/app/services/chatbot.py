@@ -516,14 +516,25 @@ class Responder:
         series = "; ".join(f"{r['month_start']:%m/%Y}: {num(r['sentiment_index'])} ({num(r['new_review_count'], 0)} đg)"
                            for r in rows)
         first, last = rows[0], rows[-1]
-        delta = last["sentiment_index"] - first["sentiment_index"]
-        direction = "đi lên" if delta > 5 else "đi xuống" if delta < -5 else "gần như đi ngang"
-        best = max(rows, key=lambda r: r["sentiment_index"])
-        worst = min(rows, key=lambda r: r["sentiment_index"])
-        text = (f"Sentiment Index của **{name}** trong {len(rows)} tháng đến {until.month}/{until.year} {direction} "
-                f"({num(first['sentiment_index'])} → {num(last['sentiment_index'])}, {'+' if delta >= 0 else '−'}{num(abs(delta))} điểm). "
-                f"Cao nhất {best['month_start']:%m/%Y} ({num(best['sentiment_index'])}), thấp nhất {worst['month_start']:%m/%Y} "
-                f"({num(worst['sentiment_index'])}).\nTheo tháng: {series}.")
+        si_first = first["sentiment_index"]
+        si_last = last["sentiment_index"]
+        if si_first is not None and si_last is not None:
+            delta = si_last - si_first
+            direction = "đi lên" if delta > 5 else "đi xuống" if delta < -5 else "gần như đi ngang"
+            diff_str = f" ({num(si_first)} → {num(si_last)}, {'+' if delta >= 0 else '−'}{num(abs(delta))} điểm)"
+        else:
+            delta = None
+            direction = "biến động chưa xác định"
+            diff_str = ""
+        rows_with_si = [r for r in rows if r["sentiment_index"] is not None]
+        if rows_with_si:
+            best = max(rows_with_si, key=lambda r: r["sentiment_index"])
+            worst = min(rows_with_si, key=lambda r: r["sentiment_index"])
+            extreme_str = f" Cao nhất {best['month_start']:%m/%Y} ({num(best['sentiment_index'])}), thấp nhất {worst['month_start']:%m/%Y} ({num(worst['sentiment_index'])})."
+        else:
+            extreme_str = ""
+        text = (f"Sentiment Index của **{name}** trong {len(rows)} tháng đến {until.month}/{until.year} {direction}"
+                f"{diff_str}.{extreme_str}\nTheo tháng: {series}.")
         if any(r["new_review_count"] < MIN_SAMPLE for r in rows):
             text += f"\nCó tháng dưới {MIN_SAMPLE} đánh giá nên biến động có thể do ít mẫu."
         return ChatResult(text, "trend", data=rows, period=f"{len(rows)} tháng đến {until.month}/{until.year}")

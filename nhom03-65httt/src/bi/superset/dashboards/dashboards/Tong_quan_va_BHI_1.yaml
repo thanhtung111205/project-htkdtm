@@ -1,0 +1,214 @@
+dashboard_title: "T\u1ED5ng quan v\xE0 BHI"
+description: null
+css: ''
+slug: null
+certified_by: ''
+certification_details: ''
+published: true
+uuid: 2ed90925-0188-46c5-8abe-953ea156959f
+position:
+  CHART-explore-6-1:
+    children: []
+    id: CHART-explore-6-1
+    meta:
+      chartId: 6
+      height: 50
+      sliceName: "T\u1ED5ng s\u1ED1 \u0111\xE1nh gi\xE1 m\u1EDBi"
+      sliceNameOverride: Sentiment Index
+      uuid: 00868c9c-9bc0-4726-b4f7-b670e785ed68
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-asZ3A3muhqQCEK7FVQTPC
+    type: CHART
+  CHART-explore-7-1:
+    children: []
+    id: CHART-explore-7-1
+    meta:
+      chartId: 7
+      height: 50
+      sliceName: "T\u1ED5ng s\u1ED1 \u0111\xE1nh gi\xE1 m\u1EDBi"
+      sliceNameOverride: "T\u1EF7 l\u1EC7 ti\xEAu c\u1EF1c TB"
+      uuid: b7ac02d9-dbe6-4897-8e30-0265eff284c5
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-asZ3A3muhqQCEK7FVQTPC
+    type: CHART
+  CHART-explore-8-1:
+    children: []
+    id: CHART-explore-8-1
+    meta:
+      chartId: 8
+      height: 50
+      sliceName: "T\u1ED5ng s\u1ED1 \u0111\xE1nh gi\xE1 m\u1EDBi"
+      sliceNameOverride: "BHI trung b\xECnh"
+      uuid: 2949976a-686b-4b97-99f6-30834c671d3a
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-asZ3A3muhqQCEK7FVQTPC
+    type: CHART
+  CHART-explore-9-1:
+    children: []
+    id: CHART-explore-9-1
+    meta:
+      chartId: 9
+      height: 50
+      sliceName: "T\u1ED5ng s\u1ED1 \u0111\xE1nh gi\xE1 m\u1EDBi"
+      sliceNameOverride: "T\u1ED5ng s\u1ED1 \u0111\xE1nh gi\xE1 m\u1EDBi"
+      uuid: b29a9b76-2aaa-4bc2-8045-5cee354fe494
+      width: 4
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-AotOI5NfCwfqkXvw7H1fN
+    type: CHART
+  DASHBOARD_VERSION_KEY: v2
+  GRID_ID:
+    children:
+    - ROW-asZ3A3muhqQCEK7FVQTPC
+    - ROW-AotOI5NfCwfqkXvw7H1fN
+    id: GRID_ID
+    parents:
+    - ROOT_ID
+    type: GRID
+  HEADER_ID:
+    id: HEADER_ID
+    meta:
+      text: "T\u1ED5ng quan v\xE0 BHI"
+    type: HEADER
+  ROOT_ID:
+    children:
+    - GRID_ID
+    id: ROOT_ID
+    type: ROOT
+  ROW-AotOI5NfCwfqkXvw7H1fN:
+    children:
+    - CHART-explore-9-1
+    id: ROW-AotOI5NfCwfqkXvw7H1fN
+    meta:
+      '0': ROOT_ID
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  ROW-asZ3A3muhqQCEK7FVQTPC:
+    children:
+    - CHART-explore-6-1
+    - CHART-explore-7-1
+    - CHART-explore-8-1
+    id: ROW-asZ3A3muhqQCEK7FVQTPC
+    meta:
+      '0': ROOT_ID
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+metadata:
+  chart_configuration: {}
+  global_chart_configuration:
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    chartsInScope:
+    - 6
+    - 7
+    - 8
+    - 9
+  map_label_colors: {}
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  refresh_frequency: 0
+  color_scheme: ''
+  label_colors: {}
+  shared_label_colors: []
+  color_scheme_domain: []
+  cross_filters_enabled: true
+  default_filters: '{}'
+  native_filter_configuration:
+  - id: NATIVE_FILTER-cz09iIiiIh6dZleXfh5x4
+    controlValues:
+      enableEmptyFilter: false
+    name: "Th\u1EDDi gian"
+    filterType: filter_time
+    targets:
+    - {}
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 6
+    - 7
+    - 8
+    - 9
+    tabsInScope: []
+  - id: NATIVE_FILTER-DEjPB-Xv2scCaSNx5tptK
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+    name: "Nh\xF3m n\u1EC1n t\u1EA3ng"
+    filterType: filter_select
+    targets:
+    - column:
+        name: platform_group
+      datasetUuid: 189ca924-1f44-4f1c-9534-b56410faba45
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 6
+    - 7
+    - 8
+    - 9
+    tabsInScope: []
+  - id: NATIVE_FILTER-6PdiuoPBhNegWMg5lSZI3
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+    name: "N\u1EC1n t\u1EA3ng"
+    filterType: filter_select
+    targets:
+    - column:
+        name: platform_name
+      datasetUuid: 189ca924-1f44-4f1c-9534-b56410faba45
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+version: 1.0.0
