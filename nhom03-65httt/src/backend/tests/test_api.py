@@ -44,8 +44,7 @@ def test_platforms_from_config():
     assert {item["group"] for item in data} == {"trong_nuoc", "quoc_te"}
 
 
-def test_ai_endpoints_are_not_implemented_yet():
-    assert client.post("/api/v1/predict/aspects", json={"text": "tốt"}).status_code == 501
+def test_chat_requires_authentication():
     assert client.post("/api/v1/chat", json={"question": "xin chào"}).status_code == 401  # chatbot cần đăng nhập
 
 

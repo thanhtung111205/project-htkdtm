@@ -5,7 +5,7 @@ import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import anomaly, auth, chat, forecast, health, platforms, predict, reviews, sentiment
+from app.api import anomaly, aspects, auth, chat, forecast, health, platforms, predict, reviews, sentiment
 from app.core.config import get_settings
 from app.services import sentiment as sentiment_service
 
@@ -26,6 +26,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(platforms.router)
     app.include_router(predict.router)
+    app.include_router(aspects.router)
     app.include_router(auth.router)
     app.include_router(reviews.router)
     app.include_router(forecast.router)
