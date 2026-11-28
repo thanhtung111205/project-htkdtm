@@ -37,7 +37,7 @@ from run_pipeline import consecutive_days, read_log  # noqa: E402
 
 MAX_BODY = 4096
 MIN_TOKEN_LENGTH = 16
-ALLOWED_FIELDS = {"only", "count", "dry_run", "skip_collect"}
+ALLOWED_FIELDS = {"only", "count", "dry_run", "skip_collect", "with_context"}
 OUTPUT_TAIL_LINES = 25
 
 _lock = threading.Lock()
@@ -63,14 +63,14 @@ def validate_payload(body: object) -> tuple[list[str], dict]:
     if not isinstance(body, dict):
         return ["nội dung phải là một đối tượng JSON"], {}
     errors = [f"trường không được hỗ trợ: {key}" for key in body if key not in ALLOWED_FIELDS]
-    params: dict = {"only": [], "count": 100, "dry_run": False, "skip_collect": False}
+    params: dict = {"only": [], "count": 100, "dry_run": False, "skip_collect": False, "with_context": False}
     if "count" in body:
         count = body["count"]
         if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= 500:
             errors.append("count phải là số nguyên từ 1 đến 500")
         else:
             params["count"] = count
-    for flag in ("dry_run", "skip_collect"):
+    for flag in ("dry_run", "skip_collect", "with_context"):
         if flag in body:
             if not isinstance(body[flag], bool):
                 errors.append(f"{flag} phải là true hoặc false")
@@ -99,6 +99,8 @@ def build_command(params: dict) -> list[str]:
         command.append("--dry-run")
     if params["skip_collect"]:
         command.append("--skip-collect")
+    if params.get("with_context"):   # thêm YouTube và báo chí vào vòng (vòng đêm của n8n bật cờ này)
+        command.append("--with-context")
     return command
 
 

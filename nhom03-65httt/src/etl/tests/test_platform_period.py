@@ -217,7 +217,8 @@ def test_model_mode_reads_the_real_results_table_from_migration_0004(loaded):
         cur.execute("DELETE FROM dw.fact_review_sentiment")
         cur.execute("""
             INSERT INTO dw.fact_review_sentiment (review_key, model_key, sentiment_label)
-            SELECT f.review_key, (SELECT model_key FROM dw.dim_model WHERE model_name = 'M1_phobert'), 'tieu_cuc'
+            SELECT f.review_key, (SELECT model_key FROM dw.dim_model
+                                  WHERE model_name = 'M1_phobert' AND model_version = 'v0'), 'tieu_cuc'
             FROM dw.fact_review f JOIN clean.review_text c USING (review_key)
             JOIN dw.dim_platform p USING (platform_key)
             WHERE c.source = 'test_src' AND p.platform_name = 'DUOLINGO'""")

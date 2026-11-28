@@ -5,7 +5,7 @@ Hợp đồng (đường dẫn, dữ liệu vào) được chốt sớm để we
 
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.common import ChatIn, ErrorOut, TextIn
+from app.schemas.common import ErrorOut, TextIn
 
 router = APIRouter(prefix="/api/v1", tags=["AI (khung, chưa tích hợp)"])
 
@@ -19,8 +19,3 @@ def _not_implemented(what: str) -> HTTPException:
 @router.post("/predict/aspects", responses=_NOT_READY, summary="Dự đoán cảm xúc theo khía cạnh (M2, ABSA)")
 def predict_aspects(payload: TextIn) -> None:
     raise _not_implemented("Mô hình khía cạnh M2")
-
-
-@router.post("/chat", responses=_NOT_READY, summary="Chatbot LLM hỏi đáp trên số liệu")
-def chat(payload: ChatIn) -> None:
-    raise _not_implemented("Chatbot LLM")

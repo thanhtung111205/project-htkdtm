@@ -154,6 +154,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-eduvision}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       EDUVISION_LOG_DIR: ${ETL_RUNNER_LOG_DIR:-}
+      # Khóa YouTube Data API v3 cho bước --with-context; để trống thì vòng đêm tự bỏ qua YouTube.
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
       TZ: Asia/Ho_Chi_Minh
     volumes:
       # Dữ liệu thô và nhật ký dùng chung với lần chạy tay và Task Scheduler (cùng khóa pipeline.lock nên không chạy chồng).
