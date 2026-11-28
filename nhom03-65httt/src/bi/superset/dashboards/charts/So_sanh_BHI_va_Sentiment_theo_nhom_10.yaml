@@ -1,0 +1,33 @@
+slice_name: "So s\xE1nh BHI v\xE0 Sentiment theo nh\xF3m"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  datasource: 1__table
+  viz_type: echarts_timeseries_bar
+  x_axis: platform_group
+  time_grain_sqla: P1M
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: bhi
+    aggregate: AVG
+    label: AVG(bhi)
+  - expressionType: SIMPLE
+    column:
+      column_name: sentiment_index
+    aggregate: AVG
+    label: AVG(sentiment_index)
+  groupby: []
+  orientation: vertical
+  row_limit: 10000
+  adhoc_filters: []
+  extra_form_data: {}
+  dashboards:
+  - 2
+query_context: null
+cache_timeout: null
+uuid: f16913b1-3437-4449-886f-4c838b9a2800
+version: 1.0.0
+dataset_uuid: 189ca924-1f44-4f1c-9534-b56410faba45
