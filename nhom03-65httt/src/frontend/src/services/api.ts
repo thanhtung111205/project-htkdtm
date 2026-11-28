@@ -204,3 +204,231 @@ export async function fetchReviews(params: ReviewFilterParams = {}): Promise<Rev
 export async function fetchReviewByKey(reviewKey: number): Promise<ReviewItem> {
   return fetchApi<ReviewItem>(`/reviews/${reviewKey}`)
 }
+
+// ============================================================================
+// DTOs & API Dự báo M3 & Bất thường (HA2.7 - Demo P1)
+// ============================================================================
+
+export interface ForecastValue {
+  forecast: number
+  ci_lower: number | null
+  ci_upper: number | null
+  actual: number | null
+}
+
+export interface ForecastPeriod {
+  month: string // "YYYY-MM-DD"
+  sentiment_index?: ForecastValue | null
+  negative_rate?: ForecastValue | null
+}
+
+export interface ForecastResponse {
+  platform: string
+  message: string | null
+  periods: ForecastPeriod[]
+}
+
+/**
+ * Lấy dữ liệu dự báo ngắn hạn M3 (Sentiment Index và Tỷ lệ tiêu cực) theo nền tảng
+ * GET /api/v1/forecast?platform={platform}&periods={periods}
+ */
+export async function fetchForecast(
+  platform: string,
+  periods: number = 12
+): Promise<ForecastResponse> {
+  const query = new URLSearchParams({
+    platform,
+    periods: String(periods),
+  })
+  return fetchApi<ForecastResponse>(`/forecast?${query.toString()}`)
+}
+
+export interface AnomalyPeriod {
+  period_start: string
+  period_end: string
+  reviews: number
+  negative_rate: number
+  baseline_mean: number | null
+  baseline_std: number | null
+  threshold: number | null
+  is_anomaly: boolean
+  events: string[]
+}
+
+export interface AnomalyResponse {
+  platform: string
+  metric: string
+  status: "ok" | "khong_du_ky" | string
+  message: string | null
+  periods: AnomalyPeriod[]
+}
+
+/**
+ * Phát hiện bất thường tỷ lệ tiêu cực theo kỳ hai tuần
+ * GET /api/v1/anomaly?platform={platform}&periods={periods}
+ */
+export async function fetchAnomaly(
+  platform: string,
+  periods: number = 24
+): Promise<AnomalyResponse> {
+  const query = new URLSearchParams({
+    platform,
+    periods: String(periods),
+  })
+  return fetchApi<AnomalyResponse>(`/anomaly?${query.toString()}`)
+}
+
+// ============================================================================
+// DTOs & API AI Predict (M1 Sentiment PhoBERT & M2 Aspects ABSA)
+// ============================================================================
+
+export interface AspectItemPrediction {
+  aspect_name: "Technical" | "Academic" | "Customer Service" | "Pricing" | "Other" | string
+  sentiment_label: "tich_cuc" | "trung_tinh" | "tieu_cuc" | string
+  sentiment_score?: number
+  confidence?: number
+}
+
+export interface AspectsPredictionResponse {
+  model: string
+  aspects: AspectItemPrediction[]
+}
+
+export interface SentimentProbabilities {
+  positive?: number
+  neutral?: number
+  negative?: number
+  [key: string]: number | undefined
+}
+
+export interface SentimentPredictionResponse {
+  model?: string
+  sentiment?: string
+  sentiment_label?: string
+  label?: string
+  label_vi?: string
+  confidence?: number
+  scores?: Record<string, number>
+  probabilities?: SentimentProbabilities
+  detail?: string
+}
+
+/**
+ * Dự đoán khía cạnh nhắc tới trong câu đánh giá (M2, ABSA)
+ * POST /api/v1/predict/aspects
+ */
+export async function predictAspects(text: string): Promise<AspectsPredictionResponse> {
+  return fetchApi<AspectsPredictionResponse>("/predict/aspects", {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  })
+}
+
+/**
+ * Dự đoán cảm xúc 3 lớp cho một câu đánh giá (M1, PhoBERT)
+ * POST /api/v1/predict/sentiment
+ */
+export async function predictSentiment(text: string): Promise<SentimentPredictionResponse> {
+  return fetchApi<SentimentPredictionResponse>("/predict/sentiment", {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  })
+}
+
+// ============================================================================
+// DTOs & API KPI/BHI/So sánh (Phần C: chuẩn bị cho kpi.py của Hưng)
+// ============================================================================
+
+export interface KpiItem {
+  platform: string
+  period_start: string
+  value: number
+  sample_size?: number
+  is_partial?: boolean
+}
+
+export interface KpiSeriesResponse {
+  kpi: string
+  name: string
+  unit: string
+  granularity: string
+  items: KpiItem[]
+}
+
+export interface KpiSummaryMetric {
+  current_value: number
+  previous_value?: number
+  change_rate?: number
+  unit?: string
+}
+
+export interface KpiSummaryResponse {
+  platform: string
+  period: string
+  new_reviews: KpiSummaryMetric
+  sentiment_index: KpiSummaryMetric
+  negative_rate: KpiSummaryMetric
+  bhi: KpiSummaryMetric
+}
+
+export interface BhiPoint {
+  period_start: string
+  value: number
+}
+
+export interface BhiResponse {
+  platform: string
+  items: BhiPoint[]
+}
+
+export interface PlatformCompareItem {
+  platform: string
+  sample_size: number
+  value: number
+}
+
+export interface CompareResponse {
+  kpi: string
+  common_period: {
+    start: string
+    end: string
+  }
+  items: PlatformCompareItem[]
+}
+
+/**
+ * Lấy chuỗi dữ liệu KPI: GET /api/v1/kpi?kpi=&platform=
+ */
+export async function fetchKpi(kpi: string, platform?: string): Promise<KpiSeriesResponse> {
+  const query = new URLSearchParams({ kpi })
+  if (platform) query.set("platform", platform)
+  return fetchApi<KpiSeriesResponse>(`/kpi?${query.toString()}`)
+}
+
+/**
+ * Thẻ số tóm tắt kỳ gần nhất: GET /api/v1/kpi/summary?platform=
+ */
+export async function fetchKpiSummary(platform: string): Promise<KpiSummaryResponse> {
+  return fetchApi<KpiSummaryResponse>(`/kpi/summary?platform=${encodeURIComponent(platform)}`)
+}
+
+/**
+ * Biểu đồ chỉ số sức khỏe thương hiệu BHI: GET /api/v1/bhi?platform=&from=&to=
+ */
+export async function fetchBhi(platform: string, from?: string, to?: string): Promise<BhiResponse> {
+  const query = new URLSearchParams({ platform })
+  if (from) query.set("from", from)
+  if (to) query.set("to", to)
+  return fetchApi<BhiResponse>(`/bhi?${query.toString()}`)
+}
+
+/**
+ * So sánh giữa các nền tảng: GET /api/v1/compare?platforms=A,B&kpi=
+ */
+export async function fetchCompare(platforms: string[], kpi: string): Promise<CompareResponse> {
+  const query = new URLSearchParams({
+    platforms: platforms.join(","),
+    kpi,
+  })
+  return fetchApi<CompareResponse>(`/compare?${query.toString()}`)
+}

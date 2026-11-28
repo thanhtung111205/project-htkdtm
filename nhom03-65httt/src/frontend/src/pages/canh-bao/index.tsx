@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { Activity, AlertTriangle, CheckCircle2 } from "lucide-react"
 
-import { FilterPills, MockNotice, PageHeading, toneClass } from "@/components/shared/common"
+import { FilterPills, MockBadge, MockNotice, PageHeading, toneClass } from "@/components/shared/common"
 import { alertItems, type MockAlert } from "@/services/mock-data"
 
 const severityTone: Record<MockAlert["severity"], string> = {
@@ -19,10 +19,7 @@ export default function CanhBaoPage() {
 
   return (
     <>
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
-        <AlertTriangle className="size-4 shrink-0" />
-        <span>Dữ liệu minh họa</span>
-      </div>
+      <MockBadge waitingApi="alerts.py (Hưng)" />
 
       <PageHeading eyebrow="THEO DÕI CHỦ ĐỘNG" title="Cảnh báo & khuyến nghị" description="Ưu tiên tín hiệu cần xử lý và hành động gợi ý dựa trên dữ liệu." />
 

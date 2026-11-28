@@ -1,7 +1,6 @@
 import { Fragment } from "react"
-import { AlertTriangle } from "lucide-react"
 
-import { PageHeading, Panel, sentimentTone } from "@/components/shared/common"
+import { MockBadge, PageHeading, Panel, TrialAnalysis, sentimentTone } from "@/components/shared/common"
 import { aspectMix, aspectScores, aspects, voiceSamples, type PlatformGroup } from "@/services/mock-data"
 
 function scoreClass(score: number) {
@@ -16,16 +15,17 @@ const groups: PlatformGroup[] = ["Trong nước", "Quốc tế"]
 export default function KhiaCanhPage() {
   return (
     <>
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
-        <AlertTriangle className="size-4 shrink-0" />
-        <span>Dữ liệu minh họa, chưa nối API KPI</span>
-      </div>
+      <MockBadge waitingApi="M2 PhoBERT & dữ liệu fact_review_aspect (Thái Anh)" />
 
       <PageHeading
         eyebrow="TIẾNG NÓI HỌC VIÊN"
         title="Phân tích khía cạnh"
         description="Khám phá điều học viên yêu thích và những điểm cần cải thiện theo 4 khía cạnh."
       />
+
+      <div className="mb-6">
+        <TrialAnalysis />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.45fr_1fr]">
         <Panel

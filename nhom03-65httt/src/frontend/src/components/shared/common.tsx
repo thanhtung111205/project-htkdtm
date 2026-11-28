@@ -171,3 +171,6 @@ export function MockNotice() {
     <span className="rounded-full bg-indigo-500/10 px-2 py-1 text-[10px] font-semibold text-indigo-600">Dữ liệu minh họa</span>
   )
 }
+
+export { MockBadge } from "./MockBadge"
+export { TrialAnalysis } from "./TrialAnalysis"

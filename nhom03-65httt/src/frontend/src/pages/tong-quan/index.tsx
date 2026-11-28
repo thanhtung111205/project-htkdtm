@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { Activity, AlertTriangle, Sparkles } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
-import { KpiCard, PageHeading, Panel, formatNumber, toneClass } from "@/components/shared/common"
+import { KpiCard, MockBadge, PageHeading, Panel, formatNumber, toneClass } from "@/components/shared/common"
 import { DATA_AS_OF, kpis, platforms, recommendations, sentimentTrend, sources } from "@/services/mock-data"
 
 const GRID = "hsl(var(--border))"
@@ -16,10 +16,7 @@ export default function TongQuanPage() {
 
   return (
     <>
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
-        <AlertTriangle className="size-4 shrink-0" />
-        <span>Dữ liệu minh họa, chưa nối API KPI</span>
-      </div>
+      <MockBadge waitingApi="kpi.py (Hưng)" />
 
       <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <PageHeading
