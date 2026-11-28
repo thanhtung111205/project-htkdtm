@@ -42,7 +42,7 @@ position:
     id: CHART-dash-10
     meta:
       chartId: 10
-      uuid: e6905479-40e8-5208-9aff-eb239b546c2e
+      uuid: f16913b1-3437-4449-886f-4c838b9a2800
       height: 50
       sliceName: So sánh BHI và Sentiment theo nhóm
       width: 6
@@ -56,7 +56,7 @@ position:
     id: CHART-dash-11
     meta:
       chartId: 11
-      uuid: a73744ca-4490-5e84-96a9-07c9b1395805
+      uuid: 526a65b9-777f-4c04-b2af-0613a720ac53
       height: 50
       sliceName: Xu hướng đánh giá theo nền tảng
       width: 6
@@ -70,7 +70,7 @@ position:
     id: CHART-dash-12
     meta:
       chartId: 12
-      uuid: 34ae5bee-7509-5f55-8590-57b33e5cde7d
+      uuid: 52f2e476-138a-4084-b0fe-62f4a4bac387
       height: 50
       sliceName: Tổng hợp KPI theo nền tảng
       width: 6

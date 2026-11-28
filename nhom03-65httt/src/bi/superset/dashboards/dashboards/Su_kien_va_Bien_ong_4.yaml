@@ -41,7 +41,7 @@ position:
     id: CHART-dash-13
     meta:
       chartId: 13
-      uuid: 89c8c1b0-dcba-5c98-aa68-ea3d8b6d9b1a
+      uuid: 5ffb805b-94b8-4332-8c15-1810453123a6
       height: 50
       sliceName: Tỷ lệ tiêu cực theo nền tảng
       width: 6
@@ -55,7 +55,7 @@ position:
     id: CHART-dash-14
     meta:
       chartId: 14
-      uuid: 96082a83-6b3a-5244-9509-3f591ff3e59f
+      uuid: 3af632bd-7d3c-4249-8a88-c2865b5e716f
       height: 50
       sliceName: Danh sách sự kiện
       width: 6
