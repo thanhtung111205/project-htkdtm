@@ -1,0 +1,27 @@
+slice_name: "Danh s\xE1ch s\u1EF1 ki\u1EC7n"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 4__table
+  viz_type: table
+  query_mode: raw
+  all_columns:
+  - platform_name
+  - event_type
+  - start_date
+  - end_date
+  - description
+  - needs_review
+  metrics: []
+  row_limit: 10000
+  adhoc_filters: []
+  extra_form_data: {}
+  dashboards:
+  - 4
+query_context: null
+cache_timeout: null
+uuid: 3af632bd-7d3c-4249-8a88-c2865b5e716f
+version: 1.0.0
+dataset_uuid: b7c5fdb6-bb22-4ed4-af1a-3523fc3e38e2

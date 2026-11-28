@@ -1,0 +1,16 @@
+database_name: EduVision DW
+sqlalchemy_uri: postgresql+psycopg2://superset_ro:XXXXXXXXXX@postgres:5432/eduvision
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_dml: false
+allow_file_upload: false
+extra:
+  metadata_params: {}
+  engine_params: {}
+  metadata_cache_timeout: {}
+  schemas_allowed_for_file_upload: []
+uuid: b9b4c951-fb60-4dba-9a86-da534c01705e
+version: 1.0.0

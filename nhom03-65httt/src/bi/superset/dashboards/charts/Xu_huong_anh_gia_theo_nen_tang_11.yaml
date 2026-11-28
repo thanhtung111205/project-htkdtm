@@ -1,0 +1,29 @@
+slice_name: "Xu h\u01B0\u1EDBng \u0111\xE1nh gi\xE1 theo n\u1EC1n t\u1EA3ng"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  datasource: 1__table
+  viz_type: echarts_timeseries_line
+  x_axis: month_start
+  time_grain_sqla: P1M
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: avg_rating
+    aggregate: AVG
+    label: AVG(avg_rating)
+  groupby:
+  - platform_name
+  seriesType: line
+  row_limit: 10000
+  adhoc_filters: []
+  extra_form_data: {}
+  dashboards:
+  - 2
+query_context: null
+cache_timeout: null
+uuid: 526a65b9-777f-4c04-b2af-0613a720ac53
+version: 1.0.0
+dataset_uuid: 189ca924-1f44-4f1c-9534-b56410faba45
