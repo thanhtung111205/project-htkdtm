@@ -12,7 +12,8 @@ Mỗi vòng:
   2. Nạp các CSV vừa thu thập qua raw -> clean -> dw (loại trùng theo (source, review_id), chạy lại không sinh trùng).
   3. Sau khi nạp (trừ --dry-run và --no-post): chấm cảm xúc M1 cho đánh giá mới (nếu có mô hình và thư viện torch),
      rồi tổng hợp dw.fact_platform_period (nền tảng x tháng), rồi sinh cảnh báo và khuyến nghị vào dw.fact_alert (T7). Bước lỗi không làm hỏng vòng, trạng thái là `partial`.
-  4. Với --with-context: thu thập thêm báo chí (nạp clean.news_article) và YouTube (khi có YOUTUBE_API_KEY).
+  4. Với --with-context: thu thêm bình luận YouTube (khi có YOUTUBE_API_KEY) cùng lúc với bước 1 để nạp chung vào kho,
+     và sau ETL thu báo chí 45 ngày gần nhất (nạp clean.news_article). n8n bật cờ này cho vòng đêm.
   5. Ghi một bản ghi vào data/logs/pipeline_runs.jsonl (ngoài Git) và từng bước vào dw.etl_run_log (nếu bảng có).
 
 Một collector lỗi không làm hỏng vòng: các nền tảng khác vẫn chạy, trạng thái vòng là `partial`.
@@ -220,50 +221,93 @@ def run_post_steps(args: argparse.Namespace, steps: list[dict]) -> int:
     return failures
 
 
-def run_context(args: argparse.Namespace, platform_ids: list[str], steps: list[dict]) -> int:
-    """Thu thập báo chí (nạp clean.news_article) và YouTube (chỉ khi có YOUTUBE_API_KEY). Trả về số bước lỗi."""
-    failures = 0
-    out_dir = args.incoming.parent / "context_incoming" / datetime.now(VN_TZ).strftime("%Y%m%d_%H%M%S")
-    out_dir.mkdir(parents=True, exist_ok=True)
+NEWS_WINDOW_DAYS = 45          # vòng đêm chỉ quét báo chí 45 ngày gần nhất; bài cũ đã có thì ON CONFLICT bỏ qua
+YOUTUBE_TIMEOUT = 3600         # YouTube quét nhiều video, giãn cách 2 giây mỗi lần gọi nên cần lâu hơn collector kho
+YOUTUBE_NO_KEY = 3             # mã thoát của youtube_collector.py khi chưa có YOUTUBE_API_KEY
+
+
+def _targets(platform_ids: list[str]) -> list[str | None]:
+    """Collector báo chí và YouTube chỉ nhận MỘT --only: chạy một lần cho tất cả, hoặc lần lượt từng nền tảng."""
+    all_ids = [p["id"] for p in load_platforms()]
+    return [None] if sorted(platform_ids) == sorted(all_ids) else list(platform_ids)
+
+
+def context_dir(args: argparse.Namespace, stamp: str) -> Path:
+    path = args.incoming.parent / "context_incoming" / stamp
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def run_youtube(args: argparse.Namespace, platform_ids: list[str], out_dir: Path, stamp: str) -> list[dict]:
+    """Thu bình luận YouTube TRƯỚC khi nạp ETL. Chỉ chép youtube_<nen_tang>.csv (12 cột chuẩn) vào out_dir để đi cùng
+    Google Play và App Store qua raw -> clean -> dw; nhật ký video (khác cột) ở lại thư mục bối cảnh.
+    Chưa có khóa thì bỏ qua, không tính là lỗi. Nền tảng có youtube_queries rỗng (MONKEY) được collector tự bỏ qua."""
+    work = context_dir(args, stamp) / "youtube"
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
-    only = [arg for pid in platform_ids for arg in ("--only", pid)]
-
-    started = datetime.now(timezone.utc)
-    news_dir = out_dir / "news"
-    command = [sys.executable, str(ETL_DIR / "collectors" / "news_collector.py"), *only,
-               "--sleep", str(args.sleep), "--out", str(news_dir)]
-    try:
-        done = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                              timeout=args.timeout, env=env)
-        if done.returncode != 0:
-            tail = (done.stderr or done.stdout or "").strip().splitlines()
-            raise RuntimeError(tail[-1][:300] if tail else "collector báo chí lỗi")
-        news_csv = news_dir / "news.csv"
-        with connect(args.env_file) as conn:
-            stats = load_news(conn, news_csv)
-            conn.commit()
-        _step(steps, "news", "success", started, input_name=news_csv.name,
-              rows_read=stats.get("read"), rows_inserted=stats.get("inserted"))
-        print(f"  báo chí: {stats.get('inserted')} bài mới")
-    except Exception as exc:  # noqa: BLE001
-        failures += 1
-        _step(steps, "news", "failed", started, error=f"{type(exc).__name__}: {exc}")
-        print("  báo chí: LỖI", exc, file=sys.stderr)
-
-    if os.environ.get("YOUTUBE_API_KEY"):
-        command = [sys.executable, str(ETL_DIR / "collectors" / "youtube_collector.py"), *only,
-                   "--out", str(out_dir / "youtube")]
+    results: list[dict] = []
+    for target in _targets(platform_ids):
+        command = [sys.executable, str(ETL_DIR / "collectors" / "youtube_collector.py"),
+                   "--sleep", str(args.sleep), "--out", str(work)]
+        if target:
+            command += ["--only", target]
+        item = {"collector": "youtube", "platform": target or "tat_ca"}
+        clock = time.monotonic()
         try:
             done = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                                  timeout=args.timeout, env=env)
-            ok = done.returncode == 0
+                                  timeout=max(args.timeout, YOUTUBE_TIMEOUT), env=env)
+            item["returncode"] = done.returncode
+            tail = (done.stdout + done.stderr).strip().splitlines()
+            item["tail"] = tail[-1][:300] if tail else ""
         except subprocess.TimeoutExpired:
-            ok = False
-        print("  YouTube:", "ok" if ok else "LỖI")
-        failures += 0 if ok else 1
-    else:
-        print("  bỏ qua YouTube: chưa đặt YOUTUBE_API_KEY")
-    return failures
+            item.update(returncode=-1, tail="quá thời gian")
+        item["seconds"] = round(time.monotonic() - clock, 1)
+        if item["returncode"] == YOUTUBE_NO_KEY:
+            print("  bỏ qua YouTube: chưa đặt YOUTUBE_API_KEY")
+            return []
+        print(f"  thu thập youtube    {item['platform']:<14} {'ok' if item['returncode'] == 0 else 'LỖI'}"
+              f" ({item['seconds']} giây) {item['tail']}")
+        results.append(item)
+    for path in sorted(work.glob("youtube_*.csv")):
+        if path.name != "youtube_videos_log.csv":
+            (out_dir / path.name).write_bytes(path.read_bytes())
+    return results
+
+
+def run_news(args: argparse.Namespace, platform_ids: list[str], steps: list[dict], stamp: str) -> int:
+    """Thu báo chí (Google News RSS và RSS chuyên mục giáo dục) NEWS_WINDOW_DAYS ngày gần nhất, nạp clean.news_article.
+    Trả về số bước lỗi."""
+    started = datetime.now(timezone.utc)
+    since = (datetime.now(VN_TZ).date() - timedelta(days=NEWS_WINDOW_DAYS)).isoformat()
+    env = dict(os.environ, PYTHONIOENCODING="utf-8")
+    read = inserted = 0
+    names: list[str] = []
+    try:
+        for target in _targets(platform_ids):
+            news_dir = context_dir(args, stamp) / "news" / (target or "tat_ca").replace(" ", "_")
+            command = [sys.executable, str(ETL_DIR / "collectors" / "news_collector.py"),
+                       "--since", since, "--sleep", str(args.sleep), "--out", str(news_dir)]
+            if target:
+                command += ["--only", target]
+            done = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                  timeout=args.timeout, env=env)
+            if done.returncode != 0:
+                tail = (done.stderr or done.stdout or "").strip().splitlines()
+                raise RuntimeError(tail[-1][:300] if tail else "collector báo chí lỗi")
+            news_csv = news_dir / "news.csv"
+            with connect(args.env_file) as conn:
+                stats = load_news(conn, news_csv)
+                conn.commit()
+            read += stats.get("read") or 0
+            inserted += stats.get("inserted") or 0
+            names.append(f"{target or 'tat_ca'}/news.csv")
+        _step(steps, "news", "success", started, input_name=", ".join(names)[:200],
+              rows_read=read, rows_inserted=inserted)
+        print(f"  báo chí (từ {since}): đọc {read}, {inserted} bài mới")
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        _step(steps, "news", "failed", started, error=f"{type(exc).__name__}: {exc}")
+        print("  báo chí: LỖI", exc, file=sys.stderr)
+        return 1
 
 
 def save_run_steps(args: argparse.Namespace, run_id: str, steps: list[dict]) -> None:
@@ -308,6 +352,8 @@ def run_cycle(args: argparse.Namespace) -> int:
             out_dir.mkdir(parents=True, exist_ok=True)
             print(f"Thu thập {len(platform_ids)} nền tảng, mỗi nền tảng tối đa {args.count} đánh giá mỗi kho:")
             collector_results = run_collectors(platform_ids, out_dir, args.count, args.sleep, args.timeout)
+            if args.with_context and not args.dry_run:
+                collector_results += run_youtube(args, platform_ids, out_dir, stamp)
             files = sorted(out_dir.glob("*.csv"))
         failed = sum(1 for r in collector_results if r["returncode"] != 0)
         # collector thoát mã 0 nhưng CSV rỗng (ví dụ nguồn cấp RSS của Apple trả 0 mục): báo rõ, không im lặng
@@ -352,7 +398,7 @@ def run_cycle(args: argparse.Namespace) -> int:
                 extra_failures += run_post_steps(args, steps)
             if args.with_context:
                 print("Dữ liệu bối cảnh:")
-                extra_failures += run_context(args, platform_ids, steps)
+                extra_failures += run_news(args, platform_ids, steps, stamp)
         summary["post_failures"] = extra_failures
         entry["status"] = "dry_run" if args.dry_run else ("partial" if failed or extra_failures else "success")
         entry["summary"] = summary
@@ -391,7 +437,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--no-post", action="store_true",
                         help="Không chấm M1, không dựng fact_platform_period và không sinh cảnh báo sau khi nạp")
     parser.add_argument("--with-context", action="store_true",
-                        help="Thu thập thêm báo chí (và YouTube nếu có YOUTUBE_API_KEY) trong cùng vòng")
+                        help="Thu thập thêm YouTube (nếu có YOUTUBE_API_KEY) và báo chí 45 ngày gần nhất trong cùng vòng")
     parser.add_argument("--report", action="store_true", help="In bằng chứng tự chạy liên tiếp rồi thoát")
     parser.add_argument("--min-days", type=int, default=3, help="Số ngày liên tiếp tối thiểu khi --report (mặc định 3)")
     args = parser.parse_args(argv)

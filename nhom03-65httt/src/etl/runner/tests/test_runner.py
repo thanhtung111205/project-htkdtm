@@ -108,7 +108,7 @@ def test_default_body_runs_with_count_100(server):
 
 @pytest.mark.parametrize("body", [
     {"count": 0}, {"count": 501}, {"count": "100"}, {"count": True}, {"count": 1.5},
-    {"dry_run": "yes"}, {"skip_collect": 1}, {"only": "ELSA Speak"}, {"only": [1]}, {"only": ["Khong Co"]},
+    {"dry_run": "yes"}, {"skip_collect": 1}, {"with_context": "true"}, {"only": "ELSA Speak"}, {"only": [1]}, {"only": ["Khong Co"]},
     {"command": "rm -rf /"}, {"only": ["ELSA Speak; rm -rf /"]}, [], "chuoi",
 ])
 def test_bad_payloads_are_rejected_without_running(server, body):
@@ -191,6 +191,15 @@ def test_unknown_paths_are_404(server):
 def test_build_command_never_uses_a_shell_string():
     command = runner.build_command({"only": ["Khan Academy"], "count": 5, "dry_run": False, "skip_collect": True})
     assert isinstance(command, list) and command[-1] == "--skip-collect" and "Khan Academy" in command
+
+
+def test_with_context_flag_is_passed_only_when_true():
+    base = {"only": [], "count": 100, "dry_run": False, "skip_collect": False}
+    assert "--with-context" in runner.build_command({**base, "with_context": True})
+    assert "--with-context" not in runner.build_command({**base, "with_context": False})
+    errors, params = runner.validate_payload({"with_context": True})
+    assert errors == [] and params["with_context"] is True
+    assert runner.validate_payload({})[1]["with_context"] is False     # mặc định tắt: webhook cũ không đổi hành vi
 
 
 def test_main_refuses_to_start_without_a_strong_token(monkeypatch, capsys):

@@ -130,3 +130,65 @@ def test_count_csv_rows_ignores_newlines_inside_quoted_text(tmp_path) -> None:
     header_only = tmp_path / "empty.csv"
     header_only.write_text("review_id,text\n", encoding="utf-8")
     assert run_pipeline.count_csv_rows(header_only) == 0
+
+
+# ------------------------------------------------------------------ dữ liệu bối cảnh (--with-context)
+class _Done:
+    def __init__(self, returncode=0, stdout="", stderr=""):
+        self.returncode, self.stdout, self.stderr = returncode, stdout, stderr
+
+
+def _ctx_args(tmp_path):
+    return run_pipeline.argparse.Namespace(incoming=tmp_path / "incoming", sleep=2.0, timeout=900, env_file=None)
+
+
+def test_youtube_runs_once_for_all_platforms_and_only_review_csv_is_loaded(tmp_path, monkeypatch) -> None:
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command)
+        out = Path(command[command.index("--out") + 1])
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "youtube_elsa_speak.csv").write_text("source,review_id\nyoutube,a\n", encoding="utf-8")
+        (out / "youtube_videos_log.csv").write_text("platform,video_id\nELSA Speak,v\n", encoding="utf-8")
+        return _Done()
+
+    monkeypatch.setattr(run_pipeline.subprocess, "run", fake_run)
+    out_dir = tmp_path / "incoming" / "lan1"
+    out_dir.mkdir(parents=True)
+    all_ids = [p["id"] for p in run_pipeline.load_platforms()]
+    results = run_pipeline.run_youtube(_ctx_args(tmp_path), all_ids, out_dir, "lan1")
+    assert len(calls) == 1 and "--only" not in calls[0]          # đủ 9 nền tảng: một lần, không cắt còn nền tảng cuối
+    assert [r["returncode"] for r in results] == [0]
+    assert sorted(p.name for p in out_dir.glob("*.csv")) == ["youtube_elsa_speak.csv"]   # nhật ký video không bị nạp
+
+
+def test_youtube_subset_runs_each_platform_and_missing_key_is_not_a_failure(tmp_path, monkeypatch) -> None:
+    calls = []
+    monkeypatch.setattr(run_pipeline.subprocess, "run", lambda command, **kw: calls.append(command) or _Done())
+    out_dir = tmp_path / "o"
+    out_dir.mkdir()
+    run_pipeline.run_youtube(_ctx_args(tmp_path), ["ELSA Speak", "VUIHOC"], out_dir, "lan2")
+    assert [c[c.index("--only") + 1] for c in calls] == ["ELSA Speak", "VUIHOC"]
+    monkeypatch.setattr(run_pipeline.subprocess, "run", lambda command, **kw: _Done(returncode=3))
+    assert run_pipeline.run_youtube(_ctx_args(tmp_path), ["ELSA Speak"], out_dir, "lan3") == []
+
+
+def test_news_uses_recent_window_and_logs_step(tmp_path, monkeypatch) -> None:
+    calls = []
+    monkeypatch.setattr(run_pipeline.subprocess, "run", lambda command, **kw: calls.append(command) or _Done())
+
+    class _Conn:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def commit(self): pass
+
+    monkeypatch.setattr(run_pipeline, "connect", lambda env_file=None: _Conn())
+    monkeypatch.setattr(run_pipeline, "load_news", lambda conn, path: {"read": 7, "inserted": 2})
+    steps: list[dict] = []
+    all_ids = [p["id"] for p in run_pipeline.load_platforms()]
+    assert run_pipeline.run_news(_ctx_args(tmp_path), all_ids, steps, "lan4") == 0
+    since = calls[0][calls[0].index("--since") + 1]
+    expected = (datetime.now(VN).date() - timedelta(days=run_pipeline.NEWS_WINDOW_DAYS)).isoformat()
+    assert since == expected and "--only" not in calls[0]
+    assert steps[-1]["step"] == "news" and steps[-1]["status"] == "success" and steps[-1]["rows_inserted"] == 2

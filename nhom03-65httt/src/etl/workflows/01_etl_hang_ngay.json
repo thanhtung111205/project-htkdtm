@@ -60,7 +60,7 @@
             {
               "id": "d2-a",
               "name": "payload",
-              "value": "={{ {\"count\": 100, \"dry_run\": false, \"skip_collect\": false} }}",
+              "value": "={{ {\"count\": 100, \"dry_run\": false, \"skip_collect\": false, \"with_context\": true} }}",
               "type": "object"
             }
           ]
