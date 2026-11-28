@@ -34,6 +34,6 @@ PhoBERT M2 vượt mục tiêu macro-F1 0,65 trên tập vàng. Các chỉ số 
 
 ## Baseline và API
 
-Baseline ở `src/backend/app/services/aspects_baseline.py` dùng luật từ khóa giải thích được, tách mệnh đề quanh từ nối tương phản để giữ cảm xúc trái chiều giữa các khía cạnh. API `POST /api/v1/predict/aspects` trả `model: "keyword_baseline"` cùng các khía cạnh được nhắc; câu không có khía cạnh trả danh sách rỗng. Trường `model` giúp không nhầm kết quả baseline với M2.
+Baseline ở `src/backend/app/services/aspects_baseline.py` dùng luật từ khóa giải thích được, tách mệnh đề quanh từ nối tương phản để giữ cảm xúc trái chiều giữa các khía cạnh. API `POST /api/v1/predict/aspects` dùng PhoBERT M2 khi checkpoint cục bộ và runtime ML có sẵn; nếu thiếu thì dùng baseline và trả đúng `model: "keyword_baseline"`. Khi dùng mô hình đã huấn luyện, API trả `model: "M2_phobert_absa"`. Trường `model` giúp phân biệt rõ hai nguồn dự đoán.
 
 Script `src/ml/aspects/score_aspects.py` có thể nạp baseline hoặc scorer M2 tương thích vào `dw.fact_review_aspect`; cần CSDL và dữ liệu đánh giá đã ETL. Script bỏ qua xung đột đang thuộc một model khác; chỉ dùng `--replace-existing` khi chủ động thay toàn bộ kết quả khía cạnh cũ cho từng đánh giá.
