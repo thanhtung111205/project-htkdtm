@@ -151,7 +151,7 @@ def load_events(conn: psycopg.Connection, records: Iterable[dict[str, object]]) 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Nạp CSV sự kiện đã rà vào dw.dim_event.")
-    default_path = project_root() / "data" / "raw" / "dim_event_seed.csv"
+    default_path = project_root() / "data" / "clean" / "dim_event_seed.csv"
     parser.add_argument("--csv", type=Path, default=default_path, help="CSV riêng, không đưa lên Git")
     args = parser.parse_args()
 
