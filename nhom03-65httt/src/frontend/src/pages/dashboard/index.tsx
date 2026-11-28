@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { MockBadge } from "@/components/shared/MockBadge"
 
 export default function DashboardPage() {
   const supersetUrl = import.meta.env.VITE_SUPERSET_DASHBOARD_URL
@@ -60,6 +61,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
+      <MockBadge waitingApi="embed.py (HA5 - Superset Guest Token)" />
       {/* Page Header responsive */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-0.5">

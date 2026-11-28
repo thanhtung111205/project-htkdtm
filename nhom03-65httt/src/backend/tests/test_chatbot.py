@@ -162,3 +162,51 @@ def test_injection_attempt_is_just_text(db):
     with psycopg.connect(db) as conn, conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM dw.fact_review")
         assert cur.fetchone()[0] > 0
+
+
+def test_trend_handles_none_sentiment_index():
+    """Kiểm tra Responder._trend xử lý an toàn khi tháng đầu hoặc tháng cuối có sentiment_index = None."""
+    class MockStore:
+        latest_complete = date(2026, 10, 1)
+        latest_data = date(2026, 11, 1)
+
+        def month_bounds(self, today):
+            return self.latest_complete, self.latest_data
+
+        def platform_names(self):
+            return ["ELSA Speak"]
+
+        def monthly(self, name, months, until):
+            # Tháng đầu có None, tháng giữa có số, tháng cuối có None
+            return [
+                {"month_start": date(2026, 5, 1), "sentiment_index": None, "new_review_count": 10},
+                {"month_start": date(2026, 6, 1), "sentiment_index": 20.5, "new_review_count": 40},
+                {"month_start": date(2026, 7, 1), "sentiment_index": None, "new_review_count": 50},
+            ]
+
+    responder = cb.Responder(MockStore())
+    result = responder.answer("Xu hướng của ELSA Speak 6 tháng gần đây")
+    assert result.intent == "trend"
+    assert "biến động chưa xác định" in result.answer
+    assert "Cao nhất 06/2026 (20,5)" in result.answer
+
+    class MockStoreAllNone:
+        latest_complete = date(2026, 10, 1)
+        latest_data = date(2026, 11, 1)
+
+        def month_bounds(self, today):
+            return self.latest_complete, self.latest_data
+
+        def platform_names(self):
+            return ["ELSA Speak"]
+
+        def monthly(self, name, months, until):
+            return [
+                {"month_start": date(2026, 5, 1), "sentiment_index": None, "new_review_count": 10},
+                {"month_start": date(2026, 6, 1), "sentiment_index": None, "new_review_count": 20},
+            ]
+
+    res_all_none = cb.Responder(MockStoreAllNone()).answer("Xu hướng của ELSA Speak 6 tháng gần đây")
+    assert res_all_none.intent == "trend"
+    assert "biến động chưa xác định" in res_all_none.answer
+

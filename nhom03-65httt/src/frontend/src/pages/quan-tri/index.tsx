@@ -2,7 +2,7 @@ import { useState } from "react"
 import { MoreHorizontal, Play, Plus } from "lucide-react"
 import { toast } from "sonner"
 
-import { MockNotice, PageHeading, Panel, toneClass } from "@/components/shared/common"
+import { MockBadge, MockNotice, PageHeading, Panel, toneClass } from "@/components/shared/common"
 import { activityLog, adminUsers, etlSources } from "@/services/mock-data"
 
 const TABS = ["Người dùng", "Nguồn dữ liệu & ETL", "Nhật ký"] as const
@@ -46,6 +46,7 @@ export default function QuanTriPage() {
 
   return (
     <>
+      <MockBadge waitingApi="refresh.py & sources.py (HA4)" />
       <PageHeading eyebrow="QUẢN LÝ HỆ THỐNG" title="Quản trị" description="Quản lý người dùng, nguồn dữ liệu và hoạt động hệ thống. Chỉ vai trò Admin truy cập được." />
 
       <div className="mb-4 flex items-center justify-between border-b border-border">
