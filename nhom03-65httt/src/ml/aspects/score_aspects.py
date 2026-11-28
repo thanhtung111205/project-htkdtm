@@ -14,6 +14,7 @@ import psycopg
 
 _ROOT = Path(__file__).resolve().parents[3]
 _ETL_DIR = _ROOT / "src" / "etl"
+sys.path.insert(0, str(_ROOT / "src"))
 sys.path.insert(0, str(_ROOT / "src" / "backend"))
 sys.path.insert(0, str(_ETL_DIR))
 

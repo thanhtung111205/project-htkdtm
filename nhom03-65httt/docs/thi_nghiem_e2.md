@@ -1,8 +1,8 @@
 # Thí nghiệm E2: điểm sao và cảm xúc quanh sự kiện
 
-## Trạng thái ngày 27/11/2026
+## Trạng thái ngày 28/11/2026
 
-Chưa có kết quả định lượng vì chưa có cấu hình CSDL và trọng số M1 trong workspace. M1 đã có mã chấm điểm, nhưng thư mục `models/` hiện chưa có checkpoint. Không điền số độ trễ, biên độ hoặc tỷ lệ lệch pha trước khi chạy trên dữ liệu thật.
+Chưa thể chạy E2 trong workspace hiện tại: không có tệp cấu hình `.env`, dịch vụ CSDL không hoạt động, và `models/` chỉ có checkpoint M2, chưa có checkpoint M1. Vì vậy chưa có kết quả M1 trong `dw.fact_review_sentiment` để đo. Không điền số độ trễ, biên độ hoặc tỷ lệ lệch pha khi chưa chạy trên dữ liệu thật. Khi có CSDL và checkpoint M1, chạy `python src/ml/aspects/experiment_e2.py`, rồi cập nhật các số liệu từ `data/reports/e2_results.csv`.
 
 Seed có 34 sự kiện `needs_review=false`; 30/34 là ngày sale chung, chỉ 4 sự kiện gắn riêng nền tảng. E2 còn nhận hai cập nhật ELSA có ngày công bố rõ trong mô tả. Vì chưa xác minh ngày phát hành/rollout, kết quả của hai dòng này phải mang cảnh báo và chỉ dùng thăm dò; không diễn giải biến động như tác động nhân quả của bản cập nhật. Các mốc phiên bản suy ra từ đánh giá vẫn bị loại.
 
