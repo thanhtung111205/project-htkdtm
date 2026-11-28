@@ -2,7 +2,8 @@
 
 By default this uses a small Vietnamese keyword baseline. A project M1 scorer can
 be supplied as ``package.module:function``; it must return a dict containing
-``sentiment_score``, ``sentiment_label`` and ``confidence``.
+``sentiment_score``, ``sentiment_label`` and ``confidence``. Existing fact rows
+are preserved unless ``--replace-existing`` is passed explicitly.
 """
 
 from __future__ import annotations
@@ -150,10 +151,31 @@ def score_articles(
     model_name: str,
     model_version: str,
     trained_at: date | None = None,
+    replace_existing: bool = False,
 ) -> dict[str, int]:
     platforms = load_platforms()
     patterns = _platform_patterns(platforms)
-    stats = {"read": 0, "kept": 0, "unrelated": 0, "missing_date": 0, "missing_dimension": 0, "scored": 0}
+    stats = {
+        "read": 0,
+        "kept": 0,
+        "unrelated": 0,
+        "missing_date": 0,
+        "missing_dimension": 0,
+        "scored": 0,
+        "skipped_existing": 0,
+    }
+    conflict_action = (
+        """
+        ON CONFLICT (source_key, article_id, platform_key) DO UPDATE SET
+            time_key = EXCLUDED.time_key,
+            sentiment_score = EXCLUDED.sentiment_score,
+            sentiment_label = EXCLUDED.sentiment_label,
+            confidence = EXCLUDED.confidence,
+            mention_count = EXCLUDED.mention_count
+        """
+        if replace_existing
+        else "ON CONFLICT (source_key, article_id, platform_key) DO NOTHING"
+    )
 
     with conn.cursor() as cur:
         cur.execute("SELECT platform_name, platform_key FROM dw.dim_platform")
@@ -206,21 +228,19 @@ def score_articles(
             time_key = _ensure_time(cur, event_date)
             mention_count = max(1, len(pattern.findall(title)))
             cur.execute(
-                """
+                f"""
                 INSERT INTO dw.fact_news_sentiment
                     (source_key, article_id, platform_key, time_key, sentiment_score,
                      sentiment_label, confidence, mention_count)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (source_key, article_id, platform_key) DO UPDATE SET
-                    time_key = EXCLUDED.time_key,
-                    sentiment_score = EXCLUDED.sentiment_score,
-                    sentiment_label = EXCLUDED.sentiment_label,
-                    confidence = EXCLUDED.confidence,
-                    mention_count = EXCLUDED.mention_count
+                {conflict_action}
                 """,
                 (source_key, article_id, platform_key, time_key, score, label, confidence, mention_count),
             )
-            stats["scored"] += 1
+            if cur.rowcount:
+                stats["scored"] += 1
+            else:
+                stats["skipped_existing"] += 1
     return stats
 
 
@@ -238,6 +258,13 @@ def main() -> int:
     )
     parser.add_argument("--model-version", default=os.environ.get("TA4_MODEL_VERSION", "v1"))
     parser.add_argument("--trained-at", type=date.fromisoformat, default=None)
+    parser.add_argument(
+        "--replace",
+        "--replace-existing",
+        dest="replace_existing",
+        action="store_true",
+        help="Cho phép ghi đè kết quả đã có trong dw.fact_news_sentiment.",
+    )
     args = parser.parse_args()
 
     scorer = load_scorer(args.scorer)
@@ -249,12 +276,13 @@ def main() -> int:
             model_name=args.model_name or default_name,
             model_version=args.model_version,
             trained_at=args.trained_at,
+            replace_existing=args.replace_existing,
         )
     print(
         "Bài báo: "
         f"đọc {stats['read']}, giữ {stats['kept']}, loại không liên quan {stats['unrelated']}, "
         f"thiếu ngày/chiều {stats['missing_date'] + stats['missing_dimension']}, "
-        f"đã chấm {stats['scored']}."
+        f"đã ghi {stats['scored']}, bỏ qua dòng đã tồn tại {stats['skipped_existing']}."
     )
     return 0
 
