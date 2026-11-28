@@ -5,7 +5,7 @@ import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import alerts, anomaly, auth, chat, forecast, health, kpi, platforms, predict, reviews, sentiment
+from app.api import alerts, anomaly, aspects, auth, chat, forecast, health, kpi, platforms, predict, reviews, sentiment
 from app.core.config import get_settings
 from app.services import sentiment as sentiment_service
 
@@ -14,7 +14,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
         title="EduVision BI API",
-        description="API phục vụ website, n8n và Superset. M1 cảm xúc và chatbot tầng 1 chạy thật; M2 còn là khung (trả 501).",
+        description="API phục vụ website, n8n và Superset. M1 cảm xúc, M2 khía cạnh và chatbot tầng 1 dùng các mô hình đã tích hợp khi checkpoint khả dụng.",
         version="0.1.0",
     )
     app.add_middleware(
@@ -26,6 +26,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(platforms.router)
     app.include_router(predict.router)
+    app.include_router(aspects.router)
     app.include_router(auth.router)
     app.include_router(reviews.router)
     app.include_router(forecast.router)

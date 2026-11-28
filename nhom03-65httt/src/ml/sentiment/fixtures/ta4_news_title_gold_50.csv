@@ -1,0 +1,51 @@
+title_hash,platform,sentiment_label,annotation_method
+a2b385a90f39,DUOLINGO,tich_cuc,manual
+d9902cacccc4,DUOLINGO,trung_tinh,manual
+e42858e56af5,DUOLINGO,tich_cuc,manual
+8f28ac6f2e77,DUOLINGO,trung_tinh,manual
+86f4e6de4fb8,DUOLINGO,tich_cuc,manual
+f59594aa7528,DUOLINGO,trung_tinh,manual
+5a698e19afa8,DUOLINGO,tich_cuc,manual
+8a9b3af2fe16,DUOLINGO,trung_tinh,manual
+039270043823,DUOLINGO,trung_tinh,manual
+1fcd976c81ab,DUOLINGO,trung_tinh,manual
+0c45dce77a2a,DUOLINGO,trung_tinh,manual
+27f8bfc8d080,DUOLINGO,trung_tinh,manual
+a5fb036448e9,DUOLINGO,trung_tinh,manual
+49d1f34adab2,DUOLINGO,trung_tinh,manual
+8ab54cb8d610,DUOLINGO,tich_cuc,manual
+5b583a32b17b,DUOLINGO,tieu_cuc,manual
+495ec1dcfce4,DUOLINGO,tieu_cuc,manual
+4913c7663534,DUOLINGO,tich_cuc,manual
+1647568d17ce,DUOLINGO,tieu_cuc,manual
+b3f871a98b1f,DUOLINGO,tieu_cuc,manual
+0700315d598f,DUOLINGO,tieu_cuc,manual
+a3993b5749da,DUOLINGO,tieu_cuc,manual
+14df9a2faf9b,ELSA Speak,tich_cuc,manual
+cf2121306da5,ELSA Speak,trung_tinh,manual
+9ac4614ca4e2,ELSA Speak,trung_tinh,manual
+bbedbe27db93,ELSA Speak,tich_cuc,manual
+93efc9399f8c,ELSA Speak,tich_cuc,manual
+429388d2cb4b,ELSA Speak,trung_tinh,manual
+ffc5b881cc03,ELSA Speak,trung_tinh,manual
+36058bbc2298,ELSA Speak,trung_tinh,manual
+344e5a7e5e13,ELSA Speak,tich_cuc,manual
+e4389fa97ef3,ELSA Speak,tich_cuc,manual
+f6178a11db35,HOCMAI,tich_cuc,manual
+1319aef2c5cc,HOCMAI,tich_cuc,manual
+2af1b1af8409,HOCMAI,trung_tinh,manual
+c03a48e0b476,HOCMAI,tich_cuc,manual
+bfac0c11f015,HOCMAI,trung_tinh,manual
+ca56ca02d7f6,HOCMAI,trung_tinh,manual
+549a8e900e07,HOCMAI,tieu_cuc,manual
+be909a79637c,HOCMAI,tieu_cuc,manual
+85a7cc77cf12,MONKEY,trung_tinh,manual
+bf52dace3435,MONKEY,tich_cuc,manual
+1b6a5af7d24d,MONKEY,tich_cuc,manual
+1da775afb065,MONKEY,trung_tinh,manual
+901554ea75cf,MONKEY,tich_cuc,manual
+e5477e8971ed,MONKEY,tich_cuc,manual
+4b2e9f911738,VUIHOC,tich_cuc,manual
+e08789515b68,VUIHOC,tich_cuc,manual
+3db5838220c5,VUIHOC,tich_cuc,manual
+ad7948dadb97,VUIHOC,tich_cuc,manual
