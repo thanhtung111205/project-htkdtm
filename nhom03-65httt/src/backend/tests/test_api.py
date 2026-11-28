@@ -46,7 +46,7 @@ def test_platforms_from_config():
 
 def test_ai_endpoints_are_not_implemented_yet():
     assert client.post("/api/v1/predict/aspects", json={"text": "tốt"}).status_code == 501
-    assert client.post("/api/v1/chat", json={"question": "xin chào"}).status_code == 501
+    assert client.post("/api/v1/chat", json={"question": "xin chào"}).status_code == 401  # chatbot cần đăng nhập
 
 
 def test_validation_rejects_empty_text():
