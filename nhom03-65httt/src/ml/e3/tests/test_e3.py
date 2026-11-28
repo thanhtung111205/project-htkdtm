@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
+import sys
 import pytest
 
-from ml.e3.e3_doi_chieu import (
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from e3_doi_chieu import (
     calculate_spearman,
     compute_rating_diff,
     filter_and_group_trends,

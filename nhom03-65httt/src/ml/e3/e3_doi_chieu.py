@@ -230,11 +230,20 @@ def run_part_b(conn) -> list[dict[str, Any]]:
             x = [pt[0] for pt in pairs]
             y = [pt[1] for pt in pairs]
             rho, p_val = calculate_spearman(x, y)
+            if len(x) >= 7:
+                dx = [x[i] - x[i - 1] for i in range(1, len(x))]
+                dy = [y[i] - y[i - 1] for i in range(1, len(y))]
+                rho_diff, p_val_diff = calculate_spearman(dx, dy)
+            else:
+                rho_diff, p_val_diff = None, None
+
             results.append({
                 "platform": p,
                 "months_count": n_months,
                 "spearman_rho": rho,
                 "p_value": p_val,
+                "spearman_rho_diff": rho_diff,
+                "p_value_diff": p_val_diff,
                 "status": "đủ dữ liệu",
             })
     return results
@@ -257,17 +266,19 @@ def format_table_a(data: list[dict[str, Any]]) -> str:
 
 def format_table_b(data: list[dict[str, Any]]) -> str:
     lines = [
-        "| Nền tảng | Số tháng | Spearman rho | p-value | Trạng thái |",
-        "| :--- | :---: | :---: | :---: | :--- |",
+        "| Nền tảng | Số tháng | Spearman rho (Mức độ) | p-value | Spearman rho (Sai phân) | p-value (Sai phân) | Trạng thái |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :--- |",
     ]
     for d in data:
         if d["spearman_rho"] is not None:
+            diff_rho_str = f"{d['spearman_rho_diff']:+.4f}" if d.get("spearman_rho_diff") is not None else "N/A"
+            diff_p_str = f"{d['p_value_diff']:.4e}" if d.get("p_value_diff") is not None else "N/A"
             lines.append(
-                f"| {d['platform']} | {d['months_count']} | {d['spearman_rho']:+.4f} | {d['p_value']:.4e} | {d['status']} |"
+                f"| {d['platform']} | {d['months_count']} | {d['spearman_rho']:+.4f} | {d['p_value']:.4e} | {diff_rho_str} | {diff_p_str} | {d['status']} |"
             )
         else:
             lines.append(
-                f"| {d['platform']} | {d['months_count']} | N/A | N/A | {d['status']} |"
+                f"| {d['platform']} | {d['months_count']} | N/A | N/A | N/A | N/A | {d['status']} |"
             )
     return "\n".join(lines)
 

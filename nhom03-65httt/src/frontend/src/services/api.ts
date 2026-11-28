@@ -336,99 +336,162 @@ export async function predictSentiment(text: string): Promise<SentimentPredictio
 }
 
 // ============================================================================
-// DTOs & API KPI/BHI/So sánh (Phần C: chuẩn bị cho kpi.py của Hưng)
+// DTOs & API KPI/BHI/Aspects (kpi.py) & Cảnh báo (alerts.py)
 // ============================================================================
 
-export interface KpiItem {
-  platform: string
-  period_start: string
-  value: number
-  sample_size?: number
-  is_partial?: boolean
+export interface KpiPeriod {
+  month: string // "YYYY-MM-DD"
+  platform_name: string
+  platform_group: string
+  new_review_count: number
+  positive_rate: number | null
+  negative_rate: number | null
+  avg_rating: number | null
+  sentiment_index: number | null
+  bhi: number | null
+  review_share_in_group: number | null
 }
 
-export interface KpiSeriesResponse {
-  kpi: string
-  name: string
-  unit: string
-  granularity: string
-  items: KpiItem[]
+export interface KpiFilterParams {
+  platform_name?: string
+  platform?: string
+  platform_group?: string
+  start_date?: string
+  end_date?: string
 }
 
-export interface KpiSummaryMetric {
-  current_value: number
-  previous_value?: number
-  change_rate?: number
-  unit?: string
-}
-
-export interface KpiSummaryResponse {
-  platform: string
-  period: string
-  new_reviews: KpiSummaryMetric
-  sentiment_index: KpiSummaryMetric
-  negative_rate: KpiSummaryMetric
-  bhi: KpiSummaryMetric
+export interface KpiResponse {
+  status: "ok" | "khong_co_du_lieu" | string
+  message: string | null
+  filters: KpiFilterParams
+  data: KpiPeriod[]
 }
 
 export interface BhiPoint {
-  period_start: string
-  value: number
+  month: string // "YYYY-MM-DD"
+  platform_name: string
+  platform_group: string
+  review_count: number
+  sentiment_index: number | null
+  avg_rating: number | null
+  bhi: number | null
+  flags: string[]
 }
 
 export interface BhiResponse {
-  platform: string
-  items: BhiPoint[]
+  status: "ok" | "khong_co_du_lieu" | string
+  message: string | null
+  filters: KpiFilterParams
+  data: BhiPoint[]
 }
 
-export interface PlatformCompareItem {
-  platform: string
-  sample_size: number
-  value: number
+export interface AspectCountItem {
+  platform_name: string
+  platform_group: string
+  aspect_name: string
+  sentiment_label: string
+  count: number
 }
 
-export interface CompareResponse {
-  kpi: string
-  common_period: {
-    start: string
-    end: string
-  }
-  items: PlatformCompareItem[]
-}
-
-/**
- * Lấy chuỗi dữ liệu KPI: GET /api/v1/kpi?kpi=&platform=
- */
-export async function fetchKpi(kpi: string, platform?: string): Promise<KpiSeriesResponse> {
-  const query = new URLSearchParams({ kpi })
-  if (platform) query.set("platform", platform)
-  return fetchApi<KpiSeriesResponse>(`/kpi?${query.toString()}`)
+export interface KpiAspectsResponse {
+  status: "ok" | "khong_co_du_lieu" | string
+  message: string | null
+  filters: KpiFilterParams
+  data: AspectCountItem[]
 }
 
 /**
- * Thẻ số tóm tắt kỳ gần nhất: GET /api/v1/kpi/summary?platform=
+ * Lấy danh sách KPI theo tháng: GET /api/v1/kpi
  */
-export async function fetchKpiSummary(platform: string): Promise<KpiSummaryResponse> {
-  return fetchApi<KpiSummaryResponse>(`/kpi/summary?platform=${encodeURIComponent(platform)}`)
+export async function fetchKpi(params: KpiFilterParams = {}): Promise<KpiResponse> {
+  const query = new URLSearchParams()
+  if (params.platform_name) query.set("platform_name", params.platform_name)
+  if (params.platform) query.set("platform", params.platform)
+  if (params.platform_group) query.set("platform_group", params.platform_group)
+  if (params.start_date) query.set("start_date", params.start_date)
+  if (params.end_date) query.set("end_date", params.end_date)
+  const qs = query.toString()
+  return fetchApi<KpiResponse>(`/kpi${qs ? `?${qs}` : ""}`)
 }
 
 /**
- * Biểu đồ chỉ số sức khỏe thương hiệu BHI: GET /api/v1/bhi?platform=&from=&to=
+ * Lấy Brand Health Index (BHI) theo tháng: GET /api/v1/bhi
  */
-export async function fetchBhi(platform: string, from?: string, to?: string): Promise<BhiResponse> {
-  const query = new URLSearchParams({ platform })
-  if (from) query.set("from", from)
-  if (to) query.set("to", to)
-  return fetchApi<BhiResponse>(`/bhi?${query.toString()}`)
+export async function fetchBhi(params: KpiFilterParams = {}): Promise<BhiResponse> {
+  const query = new URLSearchParams()
+  if (params.platform_name) query.set("platform_name", params.platform_name)
+  if (params.platform) query.set("platform", params.platform)
+  if (params.platform_group) query.set("platform_group", params.platform_group)
+  if (params.start_date) query.set("start_date", params.start_date)
+  if (params.end_date) query.set("end_date", params.end_date)
+  const qs = query.toString()
+  return fetchApi<BhiResponse>(`/bhi${qs ? `?${qs}` : ""}`)
 }
 
 /**
- * So sánh giữa các nền tảng: GET /api/v1/compare?platforms=A,B&kpi=
+ * Lấy phân bố cảm xúc theo khía cạnh ABSA: GET /api/v1/kpi/aspects
  */
-export async function fetchCompare(platforms: string[], kpi: string): Promise<CompareResponse> {
-  const query = new URLSearchParams({
-    platforms: platforms.join(","),
-    kpi,
-  })
-  return fetchApi<CompareResponse>(`/compare?${query.toString()}`)
+export async function fetchKpiAspects(params: KpiFilterParams = {}): Promise<KpiAspectsResponse> {
+  const query = new URLSearchParams()
+  if (params.platform_name) query.set("platform_name", params.platform_name)
+  if (params.platform_group) query.set("platform_group", params.platform_group)
+  if (params.start_date) query.set("start_date", params.start_date)
+  if (params.end_date) query.set("end_date", params.end_date)
+  const qs = query.toString()
+  return fetchApi<KpiAspectsResponse>(`/kpi/aspects${qs ? `?${qs}` : ""}`)
+}
+
+// Ghi chú: Backend hiện chưa có endpoint /kpi/summary và /compare (dự kiến tính toán trực tiếp từ /kpi)
+
+// ============================================================================
+// DTOs & API Cảnh báo (alerts.py)
+// ============================================================================
+
+export interface AlertItem {
+  alert_key: number
+  detected_at: string
+  detected_date: string
+  platform_name: string
+  aspect_name: string | null
+  metric_name: string
+  metric_value: number
+  threshold: number
+  severity: "cao" | "trung_binh" | "thap"
+  status: "moi" | "dang_xu_ly" | "da_xu_ly"
+  recommended_action: string | null
+  responsible_department: string | null
+  notified: boolean
+}
+
+export interface AlertListResponse {
+  total: number
+  limit: number
+  offset: number
+  items: AlertItem[]
+}
+
+export interface AlertFilterParams {
+  platform?: string
+  status?: "moi" | "dang_xu_ly" | "da_xu_ly"
+  department?: string
+  start_date?: string
+  end_date?: string
+  limit?: number
+  offset?: number
+}
+
+/**
+ * Lấy danh sách cảnh báo: GET /api/v1/alerts
+ */
+export async function fetchAlerts(params: AlertFilterParams = {}): Promise<AlertListResponse> {
+  const query = new URLSearchParams()
+  if (params.platform) query.set("platform", params.platform)
+  if (params.status) query.set("status", params.status)
+  if (params.department) query.set("department", params.department)
+  if (params.start_date) query.set("start_date", params.start_date)
+  if (params.end_date) query.set("end_date", params.end_date)
+  if (params.limit !== undefined) query.set("limit", String(params.limit))
+  if (params.offset !== undefined) query.set("offset", String(params.offset))
+  const qs = query.toString()
+  return fetchApi<AlertListResponse>(`/alerts${qs ? `?${qs}` : ""}`)
 }

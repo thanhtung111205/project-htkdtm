@@ -67,19 +67,28 @@ export function TrialAnalysis() {
     if (!label) return null
     const l = label.toLowerCase()
     if (l === "tich_cuc" || l === "positive" || l === "tích cực") {
-      return <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">Tích cực</span>
+      return (
+        <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
+          Tích cực
+        </span>
+      )
     }
     if (l === "tieu_cuc" || l === "negative" || l === "tiêu cực") {
-      return <span className="rounded-full bg-rose-500/15 px-2.5 py-0.5 text-xs font-semibold text-rose-600">Tiêu cực</span>
+      return (
+        <span className="rounded-full bg-rose-500/15 px-2.5 py-0.5 text-xs font-semibold text-rose-600">
+          Tiêu cực
+        </span>
+      )
     }
-    return <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Trung lập</span>
+    return (
+      <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
+        Trung tính
+      </span>
+    )
   }
 
   const formatModelLabel = (modelName?: string) => {
-    if (!modelName) return "Đang xác định"
-    if (modelName.toLowerCase().includes("keyword_baseline")) {
-      return "baseline từ khóa, chưa phải M2"
-    }
+    if (!modelName) return "Chưa xác định"
     return modelName
   }
 
@@ -161,14 +170,16 @@ export function TrialAnalysis() {
               </div>
 
               {aspectError && (
-                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                    <div>
-                      <p className="font-semibold">Thông báo mô hình M2</p>
-                      <p className="mt-0.5 text-[11px]">{aspectError}</p>
-                    </div>
+                <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-foreground">Mô hình M2</span>
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground border border-border">
+                      M2 chưa tích hợp
+                    </span>
                   </div>
+                  <p className="mt-1 text-[11px] leading-relaxed">
+                    Mô hình phân tích khía cạnh (ABSA) đang được phát triển và chưa tích hợp vào hệ thống (API trả 501 Not Implemented).
+                  </p>
                 </div>
               )}
 
@@ -220,16 +231,12 @@ export function TrialAnalysis() {
               </div>
 
               {sentimentError && (
-                <div className="rounded-lg border border-sky-500/20 bg-sky-500/10 p-3 text-xs text-sky-700 dark:text-sky-400">
+                <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                    <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
                     <div>
-                      <p className="font-semibold">Thông báo mô hình M1 (PhoBERT)</p>
-                      <p className="mt-0.5 text-[11px] leading-relaxed">
-                        {sentimentError.includes("501") || sentimentError.includes("503") || sentimentError.includes("chưa được tích hợp")
-                          ? "Mô hình cảm xúc M1 (PhoBERT) chưa được tích hợp trên nhánh chính (có sau khi PR T2 của Tùng merge)."
-                          : sentimentError}
-                      </p>
+                      <p className="font-semibold">Lỗi mô hình cảm xúc M1</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed">{sentimentError}</p>
                     </div>
                   </div>
                 </div>
@@ -239,7 +246,7 @@ export function TrialAnalysis() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between rounded-lg border border-border p-3">
                     <span className="text-xs font-medium text-muted-foreground">Dự đoán cảm xúc:</span>
-                    <div>{formatSentimentBadge(sentimentResult.label_vi || sentimentResult.label || sentimentResult.sentiment || sentimentResult.sentiment_label)}</div>
+                    <div>{formatSentimentBadge(sentimentResult.label || sentimentResult.sentiment_label || sentimentResult.label_vi || sentimentResult.sentiment)}</div>
                   </div>
 
                   {sentimentResult.confidence !== undefined && (

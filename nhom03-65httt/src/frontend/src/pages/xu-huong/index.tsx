@@ -135,18 +135,31 @@ export default function XuHuongPage() {
       return []
     }
 
+    const multiplier = metric === "negative" ? 100 : 1
+
     return forecastData.periods.map((p) => {
       const monthKey = p.month.slice(0, 7) // "YYYY-MM"
       const val = metric === "sentiment" ? p.sentiment_index : p.negative_rate
 
-      const actual = val?.actual !== null && val?.actual !== undefined ? Number(val.actual.toFixed(2)) : undefined
-      const forecast = val?.forecast !== null && val?.forecast !== undefined ? Number(val.forecast.toFixed(2)) : undefined
+      const actual =
+        val?.actual !== null && val?.actual !== undefined
+          ? Number((val.actual * multiplier).toFixed(2))
+          : undefined
+      const forecast =
+        val?.forecast !== null && val?.forecast !== undefined
+          ? Number((val.forecast * multiplier).toFixed(2))
+          : undefined
 
       let lower: number | undefined = undefined
       let band: number | undefined = undefined
-      if (val?.ci_lower !== null && val?.ci_lower !== undefined && val?.ci_upper !== null && val?.ci_upper !== undefined) {
-        lower = Number(val.ci_lower.toFixed(2))
-        band = Math.max(0, Number((val.ci_upper - val.ci_lower).toFixed(2)))
+      if (
+        val?.ci_lower !== null &&
+        val?.ci_lower !== undefined &&
+        val?.ci_upper !== null &&
+        val?.ci_upper !== undefined
+      ) {
+        lower = Number((val.ci_lower * multiplier).toFixed(2))
+        band = Math.max(0, Number(((val.ci_upper - val.ci_lower) * multiplier).toFixed(2)))
       }
 
       return {
@@ -166,15 +179,18 @@ export default function XuHuongPage() {
       .filter((a) => a.is_anomaly)
       .map((a) => {
         const monthKey = a.period_start.slice(0, 7)
+        const ratePercent = Number((a.negative_rate * 100).toFixed(1))
+        const rateFormatted = ratePercent.toFixed(1).replace(".", ",") + "%"
         const eventText =
-          a.events && a.events.length > 0 ? a.events.join(", ") : `Tiêu cực vọt lên ${a.negative_rate}%`
+          a.events && a.events.length > 0 ? a.events.join(", ") : `Tiêu cực vọt lên ${rateFormatted}`
         return {
           month: monthKey,
-          label: `Bất thường (${a.negative_rate}%)`,
+          label: `Bất thường (${rateFormatted})`,
           detail: eventText,
           period: `${a.period_start} → ${a.period_end}`,
           reviews: a.reviews,
-          rate: a.negative_rate,
+          rate: ratePercent,
+          rateFormatted,
         }
       })
   }, [anomalyData])
@@ -205,7 +221,7 @@ export default function XuHuongPage() {
     { name: "LightGBM, có đặc trưng cảm xúc", value: compare.withSentiment },
   ]
   const accuracy = metric === "sentiment" ? 78.6 : 74.2
-  const domain: [number, number] = metric === "sentiment" ? [-1, 1] : [0, 100]
+  const domain: [number, number] = metric === "sentiment" ? [-100, 100] : [0, 100]
   const fmt = (v: number) => (metric === "sentiment" ? v.toFixed(2) : `${v}%`)
 
   return (
@@ -443,7 +459,7 @@ export default function XuHuongPage() {
                       </div>
                       <p className="mt-1 text-[11px] text-foreground/90">{item.detail}</p>
                       <div className="mt-1.5 text-[10px] text-muted-foreground">
-                        Quy mô: <b>{item.reviews}</b> đánh giá · Tỷ lệ tiêu cực: <b>{item.rate}%</b>
+                        Quy mô: <b>{item.reviews}</b> đánh giá · Tỷ lệ tiêu cực: <b>{item.rateFormatted}</b>
                       </div>
                     </div>
                   ))}
