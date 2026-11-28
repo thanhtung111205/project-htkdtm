@@ -1,4 +1,4 @@
-dashboard_title: "S\u1EF1 ki\u1EC7n v\xE0 Bi\u1EBFn \u0111\u1ED9ng"
+dashboard_title: Sự kiện và Biến động
 description: null
 css: null
 slug: null
@@ -16,7 +16,6 @@ position:
   GRID_ID:
     children:
     - ROW-dash-4
-    - ROW-N-1AFP3X99
     id: GRID_ID
     parents:
     - ROOT_ID
@@ -24,12 +23,12 @@ position:
   HEADER_ID:
     id: HEADER_ID
     meta:
-      text: "S\u1EF1 ki\u1EC7n v\xE0 Bi\u1EBFn \u0111\u1ED9ng"
+      text: Sự kiện và Biến động
     type: HEADER
   ROW-dash-4:
     children:
-    - CHART-explore-13-1
-    - CHART-explore-14-1
+    - CHART-dash-13
+    - CHART-dash-14
     id: ROW-dash-4
     meta:
       background: BACKGROUND_WHITE
@@ -37,72 +36,34 @@ position:
     - ROOT_ID
     - GRID_ID
     type: ROW
-  CHART-explore-13-1:
+  CHART-dash-13:
     children: []
-    id: CHART-explore-13-1
+    id: CHART-dash-13
     meta:
       chartId: 13
+      uuid: 89c8c1b0-dcba-5c98-aa68-ea3d8b6d9b1a
       height: 50
-      sliceName: "T\u1EF7 l\u1EC7 ti\xEAu c\u1EF1c theo n\u1EC1n t\u1EA3ng"
+      sliceName: Tỷ lệ tiêu cực theo nền tảng
       width: 6
     parents:
     - ROOT_ID
     - GRID_ID
     - ROW-dash-4
     type: CHART
-  CHART-explore-14-1:
+  CHART-dash-14:
     children: []
-    id: CHART-explore-14-1
+    id: CHART-dash-14
     meta:
       chartId: 14
+      uuid: 96082a83-6b3a-5244-9509-3f591ff3e59f
       height: 50
-      sliceName: "Danh s\xE1ch s\u1EF1 ki\u1EC7n"
+      sliceName: Danh sách sự kiện
       width: 6
     parents:
     - ROOT_ID
     - GRID_ID
     - ROW-dash-4
     type: CHART
-  ROW-N-1AFP3X99:
-    children:
-    - CHART-YBNZTQM6
-    - CHART-FZPCSDMM
-    id: ROW-N-1AFP3X99
-    meta:
-      '0': ROOT_ID
-      background: BACKGROUND_TRANSPARENT
-    type: ROW
-    parents:
-    - ROOT_ID
-    - GRID_ID
-  CHART-YBNZTQM6:
-    children: []
-    id: CHART-YBNZTQM6
-    meta:
-      chartId: 14
-      height: 50
-      sliceName: "Danh s\xE1ch s\u1EF1 ki\u1EC7n"
-      uuid: 3af632bd-7d3c-4249-8a88-c2865b5e716f
-      width: 4
-    type: CHART
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - ROW-N-1AFP3X99
-  CHART-FZPCSDMM:
-    children: []
-    id: CHART-FZPCSDMM
-    meta:
-      chartId: 13
-      height: 50
-      sliceName: "T\u1EF7 l\u1EC7 ti\xEAu c\u1EF1c theo n\u1EC1n t\u1EA3ng"
-      uuid: 5ffb805b-94b8-4332-8c15-1810453123a6
-      width: 4
-    type: CHART
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - ROW-N-1AFP3X99
 metadata:
   chart_configuration: {}
   global_chart_configuration:
@@ -127,7 +88,7 @@ metadata:
   - id: NATIVE_FILTER-TIME-1
     controlValues:
       enableEmptyFilter: false
-    name: "Th\u1EDDi gian"
+    name: Thời gian
     filterType: filter_time
     targets:
     - column:
@@ -155,7 +116,7 @@ metadata:
       multiSelect: true
       searchAllOptions: false
       inverseSelection: false
-    name: "Nh\xF3m n\u1EC1n t\u1EA3ng"
+    name: Nhóm nền tảng
     filterType: filter_select
     targets:
     - column:
@@ -183,7 +144,7 @@ metadata:
       multiSelect: true
       searchAllOptions: false
       inverseSelection: false
-    name: "N\u1EC1n t\u1EA3ng"
+    name: Nền tảng
     filterType: filter_select
     targets:
     - column:

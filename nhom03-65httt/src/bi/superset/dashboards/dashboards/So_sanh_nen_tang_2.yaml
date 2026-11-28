@@ -1,4 +1,4 @@
-dashboard_title: "So s\xE1nh n\u1EC1n t\u1EA3ng"
+dashboard_title: So sánh nền tảng
 description: null
 css: null
 slug: null
@@ -16,7 +16,6 @@ position:
   GRID_ID:
     children:
     - ROW-dash-2
-    - ROW-N-PAYLY73Q
     id: GRID_ID
     parents:
     - ROOT_ID
@@ -24,13 +23,13 @@ position:
   HEADER_ID:
     id: HEADER_ID
     meta:
-      text: "So s\xE1nh n\u1EC1n t\u1EA3ng"
+      text: So sánh nền tảng
     type: HEADER
   ROW-dash-2:
     children:
-    - CHART-explore-10-1
-    - CHART-explore-11-1
-    - CHART-explore-12-1
+    - CHART-dash-10
+    - CHART-dash-11
+    - CHART-dash-12
     id: ROW-dash-2
     meta:
       background: BACKGROUND_WHITE
@@ -38,100 +37,48 @@ position:
     - ROOT_ID
     - GRID_ID
     type: ROW
-  CHART-explore-10-1:
+  CHART-dash-10:
     children: []
-    id: CHART-explore-10-1
+    id: CHART-dash-10
     meta:
       chartId: 10
+      uuid: e6905479-40e8-5208-9aff-eb239b546c2e
       height: 50
-      sliceName: "So s\xE1nh BHI v\xE0 Sentiment theo nh\xF3m"
+      sliceName: So sánh BHI và Sentiment theo nhóm
       width: 6
     parents:
     - ROOT_ID
     - GRID_ID
     - ROW-dash-2
     type: CHART
-  CHART-explore-11-1:
+  CHART-dash-11:
     children: []
-    id: CHART-explore-11-1
+    id: CHART-dash-11
     meta:
       chartId: 11
+      uuid: a73744ca-4490-5e84-96a9-07c9b1395805
       height: 50
-      sliceName: "Xu h\u01B0\u1EDBng \u0111\xE1nh gi\xE1 theo n\u1EC1n t\u1EA3ng"
+      sliceName: Xu hướng đánh giá theo nền tảng
       width: 6
     parents:
     - ROOT_ID
     - GRID_ID
     - ROW-dash-2
     type: CHART
-  CHART-explore-12-1:
+  CHART-dash-12:
     children: []
-    id: CHART-explore-12-1
+    id: CHART-dash-12
     meta:
       chartId: 12
+      uuid: 34ae5bee-7509-5f55-8590-57b33e5cde7d
       height: 50
-      sliceName: "T\u1ED5ng h\u1EE3p KPI theo n\u1EC1n t\u1EA3ng"
+      sliceName: Tổng hợp KPI theo nền tảng
       width: 6
     parents:
     - ROOT_ID
     - GRID_ID
     - ROW-dash-2
     type: CHART
-  ROW-N-PAYLY73Q:
-    children:
-    - CHART-8D5FD335
-    - CHART-SHJQWW92
-    - CHART-NV9ATXT9
-    id: ROW-N-PAYLY73Q
-    meta:
-      '0': ROOT_ID
-      background: BACKGROUND_TRANSPARENT
-    type: ROW
-    parents:
-    - ROOT_ID
-    - GRID_ID
-  CHART-8D5FD335:
-    children: []
-    id: CHART-8D5FD335
-    meta:
-      chartId: 12
-      height: 50
-      sliceName: "T\u1ED5ng h\u1EE3p KPI theo n\u1EC1n t\u1EA3ng"
-      uuid: 52f2e476-138a-4084-b0fe-62f4a4bac387
-      width: 4
-    type: CHART
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - ROW-N-PAYLY73Q
-  CHART-SHJQWW92:
-    children: []
-    id: CHART-SHJQWW92
-    meta:
-      chartId: 11
-      height: 50
-      sliceName: "Xu h\u01B0\u1EDBng \u0111\xE1nh gi\xE1 theo n\u1EC1n t\u1EA3ng"
-      uuid: 526a65b9-777f-4c04-b2af-0613a720ac53
-      width: 4
-    type: CHART
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - ROW-N-PAYLY73Q
-  CHART-NV9ATXT9:
-    children: []
-    id: CHART-NV9ATXT9
-    meta:
-      chartId: 10
-      height: 50
-      sliceName: "So s\xE1nh BHI v\xE0 Sentiment theo nh\xF3m"
-      uuid: f16913b1-3437-4449-886f-4c838b9a2800
-      width: 4
-    type: CHART
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - ROW-N-PAYLY73Q
 metadata:
   chart_configuration: {}
   global_chart_configuration:
@@ -157,7 +104,7 @@ metadata:
   - id: NATIVE_FILTER-TIME-1
     controlValues:
       enableEmptyFilter: false
-    name: "Th\u1EDDi gian"
+    name: Thời gian
     filterType: filter_time
     targets:
     - column:
@@ -186,7 +133,7 @@ metadata:
       multiSelect: true
       searchAllOptions: false
       inverseSelection: false
-    name: "Nh\xF3m n\u1EC1n t\u1EA3ng"
+    name: Nhóm nền tảng
     filterType: filter_select
     targets:
     - column:
@@ -215,7 +162,7 @@ metadata:
       multiSelect: true
       searchAllOptions: false
       inverseSelection: false
-    name: "N\u1EC1n t\u1EA3ng"
+    name: Nền tảng
     filterType: filter_select
     targets:
     - column:
